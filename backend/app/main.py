@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 
+from app.database.database import engine
+from app.database.database import Base
+
+from app.models import user
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="AI Workspace API",
-    description="Backend API for AI Workspace",
     version="1.0.0"
 )
 
@@ -10,5 +16,5 @@ app = FastAPI(
 @app.get("/")
 def home():
     return {
-        "message": "Welcome to AI Workspace 🚀"
+        "message": "AI Workspace Backend Running 🚀"
     }
