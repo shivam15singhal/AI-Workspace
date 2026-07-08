@@ -11,7 +11,11 @@ class Chat(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    title = Column(String(255), nullable=False)
+    title = Column(
+    String(255),
+    nullable=False,
+    default="New Chat"
+)
 
     user_id = Column(
         Integer,
@@ -36,3 +40,8 @@ class Chat(Base):
         "User",
         back_populates="chats",
     )
+    messages = relationship(
+    "Message",
+    back_populates="chat",
+    cascade="all, delete-orphan",
+)
