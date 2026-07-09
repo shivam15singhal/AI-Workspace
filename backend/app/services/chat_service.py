@@ -15,3 +15,11 @@ def create_chat(db: Session, current_user: User):
     db.refresh(chat)
 
     return chat
+
+def get_user_chats(db: Session, current_user: User):
+    return (
+        db.query(Chat)
+        .filter(Chat.user_id == current_user.id)
+        .order_by(Chat.updated_at.desc())
+        .all()
+    )
