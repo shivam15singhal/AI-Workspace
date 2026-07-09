@@ -1,11 +1,38 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.chat import Chat
 from app.models.user import User
-from fastapi import HTTPException
 
 
-def create_chat(db: Session, current_user: User):
+def get_owned_chat(
+    db: Session,
+    chat_id: int,
+    current_user: User,
+) -> Chat:
+    
+    chat = (
+        db.query(Chat)
+        .filter(
+            Chat.id == chat_id,
+            Chat.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not chat:
+        raise HTTPException(
+            status_code=404,
+            detail="Chat not found",
+        )
+
+    return chat
+
+
+def create_chat(
+    db: Session,
+    current_user: User,
+) -> Chat:
     chat = Chat(
         title="New Chat",
         user_id=current_user.id,
@@ -17,7 +44,11 @@ def create_chat(db: Session, current_user: User):
 
     return chat
 
-def get_user_chats(db: Session, current_user: User):
+
+def get_user_chats(
+    db: Session,
+    current_user: User,
+) -> list[Chat]:
     return (
         db.query(Chat)
         .filter(Chat.user_id == current_user.id)
@@ -25,48 +56,30 @@ def get_user_chats(db: Session, current_user: User):
         .all()
     )
 
+
 def get_chat_by_id(
     db: Session,
     chat_id: int,
     current_user: User,
-):
-    chat = (
-        db.query(Chat)
-        .filter(
-            Chat.id == chat_id,
-            Chat.user_id == current_user.id,
-        )
-        .first()
+) -> Chat:
+    return get_owned_chat(
+        db,
+        chat_id,
+        current_user,
     )
 
-    if not chat:
-        raise HTTPException(
-            status_code=404,
-            detail="Chat not found",
-        )
-
-    return chat
 
 def update_chat(
     db: Session,
     chat_id: int,
     title: str,
     current_user: User,
-):
-    chat = (
-        db.query(Chat)
-        .filter(
-            Chat.id == chat_id,
-            Chat.user_id == current_user.id,
-        )
-        .first()
+) -> Chat:
+    chat = get_owned_chat(
+        db,
+        chat_id,
+        current_user,
     )
-
-    if not chat:
-        raise HTTPException(
-            status_code=404,
-            detail="Chat not found",
-        )
 
     chat.title = title
 
@@ -75,25 +88,17 @@ def update_chat(
 
     return chat
 
+
 def delete_chat(
     db: Session,
     chat_id: int,
     current_user: User,
-):
-    chat = (
-        db.query(Chat)
-        .filter(
-            Chat.id == chat_id,
-            Chat.user_id == current_user.id,
-        )
-        .first()
+) -> dict:
+    chat = get_owned_chat(
+        db,
+        chat_id,
+        current_user,
     )
-
-    if not chat:
-        raise HTTPException(
-            status_code=404,
-            detail="Chat not found",
-        )
 
     db.delete(chat)
     db.commit()
