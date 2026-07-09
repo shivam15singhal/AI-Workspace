@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from typing import List
 
 from app.auth.dependencies import get_current_user
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.message import MessageCreate, MessageResponse
-from app.services.message_service import create_message
+from app.services.message_service import create_message, get_chat_messages
 
 router = APIRouter(
     prefix="/api/messages",
@@ -22,5 +23,17 @@ def create_new_message(
     return create_message(
         db=db,
         message_data=message_data,
+        current_user=current_user,
+    )
+
+@router.get("/{chat_id}", response_model=List[MessageResponse])
+def get_messages(
+    chat_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_chat_messages(
+        db=db,
+        chat_id=chat_id,
         current_user=current_user,
     )
