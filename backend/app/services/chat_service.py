@@ -74,3 +74,30 @@ def update_chat(
     db.refresh(chat)
 
     return chat
+
+def delete_chat(
+    db: Session,
+    chat_id: int,
+    current_user: User,
+):
+    chat = (
+        db.query(Chat)
+        .filter(
+            Chat.id == chat_id,
+            Chat.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not chat:
+        raise HTTPException(
+            status_code=404,
+            detail="Chat not found",
+        )
+
+    db.delete(chat)
+    db.commit()
+
+    return {
+        "message": "Chat deleted successfully"
+    }
