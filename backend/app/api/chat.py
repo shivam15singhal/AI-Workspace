@@ -5,7 +5,7 @@ from app.auth.dependencies import get_current_user
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.chat import ChatCreate, ChatResponse
-from app.services.chat_service import create_chat,get_user_chats
+from app.services.chat_service import create_chat,get_user_chats, get_chat_by_id
 
 from typing import List
 
@@ -30,3 +30,16 @@ def get_chats(
     current_user: User = Depends(get_current_user),
 ):
     return get_user_chats(db, current_user)
+
+
+@router.get("/{chat_id}", response_model=ChatResponse)
+def get_chat(
+    chat_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_chat_by_id(
+        db,
+        chat_id,
+        current_user,
+    )
