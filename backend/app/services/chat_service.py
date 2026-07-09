@@ -46,3 +46,31 @@ def get_chat_by_id(
         )
 
     return chat
+
+def update_chat(
+    db: Session,
+    chat_id: int,
+    title: str,
+    current_user: User,
+):
+    chat = (
+        db.query(Chat)
+        .filter(
+            Chat.id == chat_id,
+            Chat.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not chat:
+        raise HTTPException(
+            status_code=404,
+            detail="Chat not found",
+        )
+
+    chat.title = title
+
+    db.commit()
+    db.refresh(chat)
+
+    return chat
