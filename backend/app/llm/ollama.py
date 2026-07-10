@@ -1,6 +1,10 @@
+
+
+from httpx import stream
 import ollama
 
 from app.llm.base import BaseLLM
+from typing import Generator
 
 
 class OllamaLLM(BaseLLM):
@@ -22,6 +26,7 @@ class OllamaLLM(BaseLLM):
     
 
     def generate_title(
+            
     self,
     first_message: str,
 ) -> str:
@@ -47,3 +52,18 @@ class OllamaLLM(BaseLLM):
     )
 
         return response["message"]["content"].strip()   
+    
+
+    def stream_response(
+        self,
+        messages: list[dict],
+    ) -> Generator[str, None, None]:
+
+        stream = ollama.chat(
+        model="llama3.2",
+        messages=messages,
+        stream=True,
+    )
+
+        for chunk in stream:
+            yield chunk["message"]["content"]

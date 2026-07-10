@@ -2,8 +2,12 @@ from app.llm.service import LLMService
 
 llm = LLMService()
 
-title = llm.generate_title(
-    "Explain Retrieval Augmented Generation"
-)
+messages = [
+    {
+        "role": "user",
+        "content": "Explain FastAPI in one paragraph."
+    }
+]
 
-print(title)
+for chunk in llm.stream(messages):
+    print(chunk, end="", flush=True)

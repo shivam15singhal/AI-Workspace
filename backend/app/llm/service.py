@@ -1,3 +1,5 @@
+from pyexpat.errors import messages
+
 from app.llm.ollama import OllamaLLM
 
 
@@ -17,3 +19,9 @@ class LLMService:
         first_message: str,
     ) ->    str:
         return self.llm.generate_title(first_message)   
+    
+    def stream(
+        self,
+        messages: list[dict],
+    ):
+        return self.llm.stream_response(messages)
