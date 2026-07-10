@@ -1,15 +1,14 @@
 from app.llm.service import LLMService
 
-
 llm = LLMService()
 
-response = llm.generate(
-    [
-        {
-            "role": "user",
-            "content": "Hello"
-        }
-    ]
-)
+messages = [
+    {
+        "role": "user",
+        "content": "Say hello in one sentence."
+    }
+]
+
+response = llm.generate(messages)
 
 print(response)

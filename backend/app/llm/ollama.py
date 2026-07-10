@@ -1,12 +1,21 @@
+import ollama
+
 from app.llm.base import BaseLLM
 
 
 class OllamaLLM(BaseLLM):
+    """
+    Ollama implementation of BaseLLM.
+    """
 
     def generate_response(
         self,
         messages: list[dict],
     ) -> str:
-        
 
-        return "Ollama integration coming next."
+        response = ollama.chat(
+            model="llama3.2",
+            messages=messages,
+        )
+
+        return response["message"]["content"]
