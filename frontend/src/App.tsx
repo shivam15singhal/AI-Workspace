@@ -1,8 +1,8 @@
 import AppHeader from "@/components/layout/AppHeader";
 import AppLayout from "@/components/layout/AppLayout";
 import AppSidebar from "@/components/layout/AppSidebar";
+import ChatArea from "@/components/layout/ChatArea";
 import ChatInput from "@/components/layout/ChatInput";
-import WelcomeScreen from "@/components/layout/WelcomeScreen";
 
 export default function App() {
   return (
@@ -11,7 +11,7 @@ export default function App() {
       header={<AppHeader />}
       footer={<ChatInput />}
     >
-      <WelcomeScreen />
+      <ChatArea />
     </AppLayout>
   );
 }
