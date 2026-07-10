@@ -1,19 +1,27 @@
 from sqlalchemy.orm import Session
 
 from app.enums.message_role import MessageRole
+from app.llm.service import LLMService
 from app.models.message import Message
 from app.models.user import User
 from app.schemas.message import MessageCreate
-from app.services.chat_service import get_owned_chat
-from app.llm.service import LLMService
+from app.services.chat_service import (
+    generate_chat_title,
+    get_owned_chat,
+)
+
+# Create one LLM instance for the whole module
+llm_service = LLMService()
+
 
 def save_user_message(
     db: Session,
     chat_id: int,
     content: str,
 ) -> Message:
-    
-
+    """
+    Save a user's message to the database.
+    """
     message = Message(
         chat_id=chat_id,
         role=MessageRole.USER,
@@ -26,13 +34,15 @@ def save_user_message(
 
     return message
 
+
 def save_assistant_message(
     db: Session,
     chat_id: int,
     content: str,
 ) -> Message:
-    
-
+    """
+    Save the AI assistant's response to the database.
+    """
     message = Message(
         chat_id=chat_id,
         role=MessageRole.ASSISTANT,
@@ -45,74 +55,22 @@ def save_assistant_message(
 
     return message
 
+
 def generate_ai_response(
     conversation: list[dict],
 ) -> str:
-    llm_service = LLMService()
-
+    """
+    Generate an AI response using the configured LLM.
+    """
     return llm_service.generate(conversation)
 
-def create_message(
-    db: Session,
-    message_data: MessageCreate,
-    current_user: User,
-) -> Message:
-
-    get_owned_chat(
-        db=db,
-        chat_id=message_data.chat_id,
-        current_user=current_user,
-    )
-
-    save_user_message(
-        db=db,
-        chat_id=message_data.chat_id,
-        content=message_data.content,
-    )
-
-    conversation = get_conversation_messages(
-        db=db,
-        chat_id=message_data.chat_id,
-    )
-
-    ai_response = generate_ai_response(conversation)
-
-    
-    assistant_message = save_assistant_message(
-        db=db,
-        chat_id=message_data.chat_id,
-        content=ai_response,
-    )
-
-    return assistant_message
-
-def get_chat_messages(
-    db: Session,
-    chat_id: int,
-    current_user: User,
-) -> list[Message]:
-
-
-    # Verify ownership
-    get_owned_chat(
-        db=db,
-        chat_id=chat_id,
-        current_user=current_user,
-    )
-
-    return (
-        db.query(Message)
-        .filter(Message.chat_id == chat_id)
-        .order_by(Message.created_at.asc())
-        .all()
-    )
 
 def get_conversation_messages(
     db: Session,
     chat_id: int,
 ) -> list[dict]:
     """
-    Convert database messages into Ollama/OpenAI format.
+    Convert database messages into Ollama/OpenAI chat format.
     """
 
     messages = (
@@ -141,3 +99,84 @@ def get_conversation_messages(
         )
 
     return conversation
+
+
+def create_message(
+    db: Session,
+    message_data: MessageCreate,
+    current_user: User,
+) -> Message:
+    """
+    Complete message pipeline.
+
+    1. Verify chat ownership
+    2. Save user message
+    3. Generate chat title (first message only)
+    4. Build conversation
+    5. Generate AI response
+    6. Save assistant response
+    7. Return assistant response
+    """
+
+    # Verify ownership and fetch chat
+    chat = get_owned_chat(
+        db=db,
+        chat_id=message_data.chat_id,
+        current_user=current_user,
+    )
+
+    # Save user's message
+    save_user_message(
+        db=db,
+        chat_id=message_data.chat_id,
+        content=message_data.content,
+    )
+
+    # Generate title if it's a new chat
+    generate_chat_title(
+        db=db,
+        chat=chat,
+        first_message=message_data.content,
+    )
+
+    # Build conversation history
+    conversation = get_conversation_messages(
+        db=db,
+        chat_id=message_data.chat_id,
+    )
+
+    # Generate AI response
+    ai_response = generate_ai_response(conversation)
+
+    # Save assistant message
+    assistant_message = save_assistant_message(
+        db=db,
+        chat_id=message_data.chat_id,
+        content=ai_response,
+    )
+
+    return assistant_message
+
+
+def get_chat_messages(
+    db: Session,
+    chat_id: int,
+    current_user: User,
+) -> list[Message]:
+    """
+    Return all messages for a chat.
+    """
+
+    # Verify ownership
+    get_owned_chat(
+        db=db,
+        chat_id=chat_id,
+        current_user=current_user,
+    )
+
+    return (
+        db.query(Message)
+        .filter(Message.chat_id == chat_id)
+        .order_by(Message.created_at.asc())
+        .all()
+    )

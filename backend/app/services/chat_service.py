@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.models.chat import Chat
 from app.models.user import User
+from app.llm.service import LLMService
 
+llm_service = LLMService()
 
 def get_owned_chat(
     db: Session,
@@ -90,6 +92,7 @@ def update_chat(
 
 
 def delete_chat(
+        
     db: Session,
     chat_id: int,
     current_user: User,
@@ -105,4 +108,25 @@ def delete_chat(
 
     return {
         "message": "Chat deleted successfully"
-    }
+    } 
+
+def generate_chat_title(
+    db: Session,
+    chat: Chat,
+    first_message: str,
+) -> Chat:
+    """
+    Generate and save a chat title.
+    """
+
+    if chat.title != "New Chat":
+        return chat
+
+    title = llm_service.generate_title(first_message)
+
+    chat.title = title
+
+    db.commit()
+    db.refresh(chat)
+
+    return chat
