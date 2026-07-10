@@ -11,3 +11,9 @@ class LLMService:
         messages: list[dict],
     ) -> str:
         return self.llm.generate_response(messages)
+
+    def generate_title(
+        self,
+        first_message: str,
+    ) ->    str:
+        return self.llm.generate_title(first_message)   

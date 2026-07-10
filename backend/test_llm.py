@@ -2,13 +2,8 @@ from app.llm.service import LLMService
 
 llm = LLMService()
 
-messages = [
-    {
-        "role": "user",
-        "content": "Say hello in one sentence."
-    }
-]
+title = llm.generate_title(
+    "Explain Retrieval Augmented Generation"
+)
 
-response = llm.generate(messages)
-
-print(response)
+print(title)

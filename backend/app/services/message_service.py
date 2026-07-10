@@ -7,6 +7,50 @@ from app.schemas.message import MessageCreate
 from app.services.chat_service import get_owned_chat
 from app.llm.service import LLMService
 
+def save_user_message(
+    db: Session,
+    chat_id: int,
+    content: str,
+) -> Message:
+    
+
+    message = Message(
+        chat_id=chat_id,
+        role=MessageRole.USER,
+        content=content,
+    )
+
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    return message
+
+def save_assistant_message(
+    db: Session,
+    chat_id: int,
+    content: str,
+) -> Message:
+    
+
+    message = Message(
+        chat_id=chat_id,
+        role=MessageRole.ASSISTANT,
+        content=content,
+    )
+
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    return message
+
+def generate_ai_response(
+    conversation: list[dict],
+) -> str:
+    llm_service = LLMService()
+
+    return llm_service.generate(conversation)
 
 def create_message(
     db: Session,
@@ -14,44 +58,31 @@ def create_message(
     current_user: User,
 ) -> Message:
 
-    # Verify chat ownership
     get_owned_chat(
         db=db,
         chat_id=message_data.chat_id,
         current_user=current_user,
     )
 
-    # Save user's message
-    user_message = Message(
+    save_user_message(
+        db=db,
         chat_id=message_data.chat_id,
-        role=MessageRole.USER,
         content=message_data.content,
     )
 
-    db.add(user_message)
-    db.commit()
-    db.refresh(user_message)
-
-    # Build conversation
     conversation = get_conversation_messages(
         db=db,
         chat_id=message_data.chat_id,
     )
 
-    # Generate AI response
-    llm = LLMService()
+    ai_response = generate_ai_response(conversation)
 
-    ai_response = llm.generate(conversation)
-
-    # Save assistant message
-    assistant_message = Message(
+    
+    assistant_message = save_assistant_message(
+        db=db,
         chat_id=message_data.chat_id,
-        role=MessageRole.ASSISTANT,
         content=ai_response,
     )
-
-    db.add(assistant_message)
-    db.commit()
 
     return assistant_message
 
