@@ -1,13 +1,17 @@
+import type { ReactNode } from "react";
+
 type AppLayoutProps = {
-  sidebar: React.ReactNode;
-  header: React.ReactNode;
-  children: React.ReactNode;
+  sidebar: ReactNode;
+  header: ReactNode;
+  children: ReactNode;
+  footer?: ReactNode;
 };
 
 export default function AppLayout({
   sidebar,
   header,
   children,
+  footer,
 }: AppLayoutProps) {
   return (
     <div className="flex h-screen bg-background">
@@ -19,6 +23,8 @@ export default function AppLayout({
         <main className="flex-1 overflow-hidden">
           {children}
         </main>
+
+        {footer}
       </div>
     </div>
   );
