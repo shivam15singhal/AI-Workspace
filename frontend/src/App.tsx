@@ -1,5 +1,6 @@
 import AppLayout from "@/components/layout/AppLayout";
 import AppSidebar from "@/components/layout/AppSidebar";
+import WelcomeScreen from "@/components/layout/WelcomeScreen";
 
 export default function App() {
   return (
@@ -7,11 +8,7 @@ export default function App() {
       sidebar={<AppSidebar />}
       header={<></>}
     >
-      <div className="flex h-full items-center justify-center">
-        <h1 className="text-4xl font-bold">
-          Welcome to AI Workspace
-        </h1>
-      </div>
+      <WelcomeScreen />
     </AppLayout>
   );
 }
