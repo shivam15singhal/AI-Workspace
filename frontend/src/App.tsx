@@ -1,13 +1,17 @@
-import { Button } from "@/components/ui/button";
+import AppLayout from "@/components/layout/AppLayout";
+import AppSidebar from "@/components/layout/AppSidebar";
 
-function App() {
+export default function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      <Button size="lg">
-        🚀 AI Workspace
-      </Button>
-    </main>
+    <AppLayout
+      sidebar={<AppSidebar />}
+      header={<></>}
+    >
+      <div className="flex h-full items-center justify-center">
+        <h1 className="text-4xl font-bold">
+          Welcome to AI Workspace
+        </h1>
+      </div>
+    </AppLayout>
   );
 }
-
-export default App;
