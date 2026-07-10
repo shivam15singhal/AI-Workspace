@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import Generator
 
 from app.enums.message_role import MessageRole
 from app.llm.service import LLMService
@@ -159,6 +160,7 @@ def create_message(
 
 
 def get_chat_messages(
+        
     db: Session,
     chat_id: int,
     current_user: User,
@@ -179,4 +181,63 @@ def get_chat_messages(
         .filter(Message.chat_id == chat_id)
         .order_by(Message.created_at.asc())
         .all()
+    ) 
+
+def generate_ai_response_stream(
+    conversation: list[dict],
+) -> Generator[str, None, None]:
+    """
+    Stream an AI response.
+    """
+
+    return llm_service.stream(conversation)
+
+
+def stream_ai_response(
+    db: Session,
+    message_data: MessageCreate,
+    current_user: User,
+) -> Generator[str, None, None]:
+    """
+    Stream an AI response while collecting the full text.
+    """
+
+    # Verify ownership
+    chat = get_owned_chat(
+        db=db,
+        chat_id=message_data.chat_id,
+        current_user=current_user,
+    )
+
+    # Save user message
+    save_user_message(
+        db=db,
+        chat_id=message_data.chat_id,
+        content=message_data.content,
+    )
+
+    # Generate title
+    generate_chat_title(
+        db=db,
+        chat=chat,
+        first_message=message_data.content,
+    )
+
+    # Build conversation
+    conversation = get_conversation_messages(
+        db=db,
+        chat_id=message_data.chat_id,
+    )
+
+    full_response = ""
+
+    for chunk in generate_ai_response_stream(conversation):
+        full_response += chunk
+        yield chunk
+
+    # Save assistant response after streaming completes
+    save_assistant_message(
+        db=db,
+        chat_id=message_data.chat_id,
+        content=full_response,
     )
