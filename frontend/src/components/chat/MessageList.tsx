@@ -1,9 +1,18 @@
 import MessageBubble from "./MessageBubble";
 
 import { useChatStore } from "@/store/chatStore";
+import { useAutoScroll } from "@/hooks/useAutoScroll";
+import TypingIndicator from "./TypingIndicator";
 
 export default function MessageList() {
-  const { messages } = useChatStore();
+  const messages = useChatStore(
+    (state) => state.messages,
+  );
+const isGenerating = useChatStore(
+  (state) => state.isGenerating,
+);
+  const bottomRef =
+    useAutoScroll(messages);
 
   if (messages.length === 0) {
     return (
@@ -21,6 +30,10 @@ export default function MessageList() {
           message={message}
         />
       ))}
+
+      {isGenerating && <TypingIndicator />}
+
+<div ref={bottomRef} />
     </div>
   );
 }

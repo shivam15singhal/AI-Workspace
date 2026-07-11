@@ -1,5 +1,7 @@
 
 
+from urllib import response
+
 from httpx import stream
 import ollama
 
@@ -26,11 +28,9 @@ class OllamaLLM(BaseLLM):
     
 
     def generate_title(
-            
     self,
     first_message: str,
 ) -> str:
-    
 
         response = ollama.chat(
         model="llama3.2",
@@ -38,10 +38,13 @@ class OllamaLLM(BaseLLM):
             {
                 "role": "system",
                 "content": (
-                    "Generate a short chat title."
-                    "Use 2 to 5 words only."
-                    "Do not use quotes."
-                    "Return only the title."
+                    "You generate chat titles.\n"
+                    "Rules:\n"
+                    "- Maximum 5 words.\n"
+                    "- No markdown.\n"
+                    "- No punctuation.\n"
+                    "- No explanation.\n"
+                    "- Return ONLY the title."
                 ),
             },
             {
@@ -51,9 +54,8 @@ class OllamaLLM(BaseLLM):
         ],
     )
 
-        return response["message"]["content"].strip()   
-    
-
+        return response["message"]["content"].strip()
+   
     def stream_response(
         self,
         messages: list[dict],

@@ -1,3 +1,7 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+
 import type { Message } from "@/types/message";
 
 type Props = {
@@ -22,7 +26,18 @@ export default function MessageBubble({
             : "bg-muted"
         }`}
       >
-        {message.content}
+        {isUser ? (
+          message.content
+        ) : (
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
+        )}
       </div>
     </div>
   );

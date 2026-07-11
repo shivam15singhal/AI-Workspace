@@ -115,16 +115,33 @@ def generate_chat_title(
     chat: Chat,
     first_message: str,
 ) -> Chat:
-    """
-    Generate and save a chat title.
-    """
 
     if chat.title != "New Chat":
         return chat
 
-    title = llm_service.generate_title(first_message)
+    try:
+        title = llm_service.generate_title(first_message)
 
-    chat.title = title
+        title = (
+            title.strip()
+            .replace("\n", " ")
+            .replace("#", "")
+            .replace("*", "")
+        )
+
+        title = " ".join(title.split())  # remove extra spaces
+
+        if not title:
+            title = "New Chat"
+
+        chat.title = title[:100]
+
+    except Exception:
+        chat.title = (
+            first_message[:40] + "..."
+            if len(first_message) > 40
+            else first_message
+        )
 
     db.commit()
     db.refresh(chat)

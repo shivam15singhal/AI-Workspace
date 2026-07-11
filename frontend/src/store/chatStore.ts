@@ -18,6 +18,7 @@ type ChatState = {
   selectedChat: Chat | null;
   messages: Message[];
   loading: boolean;
+  isGenerating: boolean;
 
   fetchChats: () => Promise<void>;
   fetchMessages: (chatId: number) => Promise<void>;
@@ -39,6 +40,7 @@ export const useChatStore = create<ChatState>((set) => ({
   messages: [],
 
   loading: false,
+  isGenerating: false,
 
   fetchChats: async () => {
     set({ loading: true });
@@ -110,6 +112,7 @@ export const useChatStore = create<ChatState>((set) => ({
       content: "",
       created_at: new Date().toISOString(),
     };
+    try{
 
     set({
       messages: [
@@ -118,6 +121,9 @@ export const useChatStore = create<ChatState>((set) => ({
         assistantMessage,
       ],
     });
+    set({
+  isGenerating: true,
+});
 
     await streamMessage(
       state.selectedChat.id,
@@ -135,6 +141,15 @@ export const useChatStore = create<ChatState>((set) => ({
         }));
       },
     );
+    set({
+  isGenerating: false,
+});
+    }catch (error) {
+      console.error("Error streaming message:", error);
+      set({
+        isGenerating: false,
+      });
+    }
 
     const messages = await getMessages(
       state.selectedChat.id,
