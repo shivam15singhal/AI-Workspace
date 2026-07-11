@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
-from fastapi.responses import StreamingResponse,stream_ai_response
+from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import get_current_user
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.message import MessageCreate, MessageResponse
 from app.services.message_service import create_message, get_chat_messages
+
+from app.services.message_service import stream_ai_response
 
 router = APIRouter(
     prefix="/api/messages",
