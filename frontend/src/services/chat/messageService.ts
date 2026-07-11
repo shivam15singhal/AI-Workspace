@@ -10,3 +10,18 @@ export async function getMessages(
 
   return response.data;
 }
+
+export async function sendMessage(
+  chatId: number,
+  content: string,
+): Promise<Message> {
+  const response = await api.post(
+    "/api/messages",
+    {
+      chat_id: chatId,
+      content,
+    },
+  );
+
+  return response.data;
+}

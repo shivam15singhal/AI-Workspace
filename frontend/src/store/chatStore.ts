@@ -3,6 +3,7 @@ import { create } from "zustand";
 import type { Chat } from "@/types/chat";
 import type { Message } from "@/types/message";
 
+
 import {
   getChats,
   createChat,
@@ -10,6 +11,7 @@ import {
 
 import {
   getMessages,
+  sendMessage,
 } from "@/services/chat/messageService";
 
 type ChatState = {
@@ -24,6 +26,9 @@ type ChatState = {
   createNewChat: () => Promise<void>;
 
   selectChat: (chat: Chat) => Promise<void>;
+  sendMessage: (
+  content: string,
+) => Promise<void>;
 };
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -65,6 +70,24 @@ export const useChatStore = create<ChatState>((set) => ({
       messages,
     });
   },
+  sendMessage: async (content) => {
+  const state = useChatStore.getState();
+
+  if (!state.selectedChat) return;
+
+  await sendMessage(
+    state.selectedChat.id,
+    content,
+  );
+
+  const messages = await getMessages(
+    state.selectedChat.id,
+  );
+
+  set({
+    messages,
+  });
+},
 
   createNewChat: async () => {
     const newChat = await createChat();
