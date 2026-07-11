@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
 
 export default function AppSidebar() {
-  const { chats, fetchChats } = useChatStore();
+  const {
+  chats,
+  fetchChats,
+  createNewChat,
+  selectedChat,
+  selectChat,
+} = useChatStore();
 
   useEffect(() => {
     fetchChats();
@@ -28,7 +34,10 @@ export default function AppSidebar() {
 
       {/* New Chat */}
       <div className="p-4">
-        <Button className="w-full justify-start">
+        <Button
+  className="w-full justify-start"
+  onClick={createNewChat}
+>
           <Plus className="mr-2 h-4 w-4" />
           New Chat
         </Button>
@@ -43,10 +52,15 @@ export default function AppSidebar() {
         ) : (
           chats.map((chat) => (
             <Button
-              key={chat.id}
-              variant="ghost"
-              className="w-full justify-start"
-            >
+  key={chat.id}
+  variant={
+    selectedChat?.id === chat.id
+      ? "secondary"
+      : "ghost"
+  }
+  className="w-full justify-start"
+  onClick={() => selectChat(chat)}
+>
               <MessageSquare className="mr-2 h-4 w-4" />
               {chat.title}
             </Button>
