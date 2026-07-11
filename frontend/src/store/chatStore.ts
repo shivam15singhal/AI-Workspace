@@ -3,7 +3,6 @@ import { create } from "zustand";
 import type { Chat } from "@/types/chat";
 import type { Message } from "@/types/message";
 
-
 import {
   getChats,
   createChat,
@@ -11,7 +10,7 @@ import {
 
 import {
   getMessages,
-  sendMessage,
+  streamMessage,
 } from "@/services/chat/messageService";
 
 type ChatState = {
@@ -26,9 +25,10 @@ type ChatState = {
   createNewChat: () => Promise<void>;
 
   selectChat: (chat: Chat) => Promise<void>;
+
   sendMessage: (
-  content: string,
-) => Promise<void>;
+    content: string,
+  ) => Promise<void>;
 };
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -70,24 +70,6 @@ export const useChatStore = create<ChatState>((set) => ({
       messages,
     });
   },
-  sendMessage: async (content) => {
-  const state = useChatStore.getState();
-
-  if (!state.selectedChat) return;
-
-  await sendMessage(
-    state.selectedChat.id,
-    content,
-  );
-
-  const messages = await getMessages(
-    state.selectedChat.id,
-  );
-
-  set({
-    messages,
-  });
-},
 
   createNewChat: async () => {
     const newChat = await createChat();
@@ -104,6 +86,61 @@ export const useChatStore = create<ChatState>((set) => ({
 
     set({
       selectedChat: chat,
+      messages,
+    });
+  },
+
+  sendMessage: async (content) => {
+    const state = useChatStore.getState();
+
+    if (!state.selectedChat) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      chat_id: state.selectedChat.id,
+      role: "user",
+      content,
+      created_at: new Date().toISOString(),
+    };
+
+    const assistantMessage: Message = {
+      id: Date.now() + 1,
+      chat_id: state.selectedChat.id,
+      role: "assistant",
+      content: "",
+      created_at: new Date().toISOString(),
+    };
+
+    set({
+      messages: [
+        ...state.messages,
+        userMessage,
+        assistantMessage,
+      ],
+    });
+
+    await streamMessage(
+      state.selectedChat.id,
+      content,
+      (chunk) => {
+        set((state) => ({
+          messages: state.messages.map((message) =>
+            message.id === assistantMessage.id
+              ? {
+                  ...message,
+                  content: message.content + chunk,
+                }
+              : message,
+          ),
+        }));
+      },
+    );
+
+    const messages = await getMessages(
+      state.selectedChat.id,
+    );
+
+    set({
       messages,
     });
   },

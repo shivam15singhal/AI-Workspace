@@ -7,24 +7,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { useChatStore } from "@/store/chatStore";
 
 export default function ChatInput() {
-  const [content, setContent] = useState("");
+  const [message, setMessage] = useState("");
 
   const sendMessage = useChatStore(
     (state) => state.sendMessage,
   );
 
-  const selectedChat = useChatStore(
-    (state) => state.selectedChat,
-  );
-
   async function handleSend() {
-    if (!selectedChat) return;
+    if (!message.trim()) return;
 
-    if (!content.trim()) return;
+    const content = message;
+
+    setMessage("");
 
     await sendMessage(content);
-
-    setContent("");
   }
 
   return (
@@ -39,18 +35,26 @@ export default function ChatInput() {
         </Button>
 
         <Textarea
-          value={content}
+          value={message}
           onChange={(e) =>
-            setContent(e.target.value)
+            setMessage(e.target.value)
           }
           placeholder="Type your message..."
           className="min-h-15 resize-none border-0 shadow-none focus-visible:ring-0"
+          onKeyDown={async (e) => {
+            if (
+              e.key === "Enter" &&
+              !e.shiftKey
+            ) {
+              e.preventDefault();
+              await handleSend();
+            }
+          }}
         />
 
         <Button
           size="icon"
           onClick={handleSend}
-          disabled={!selectedChat}
         >
           <SendHorizontal className="h-5 w-5" />
         </Button>
