@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Bot,
   Plus,
@@ -6,8 +7,15 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useChatStore } from "@/store/chatStore";
 
 export default function AppSidebar() {
+  const { chats, fetchChats } = useChatStore();
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
+
   return (
     <aside className="flex h-screen w-72 flex-col border-r bg-background">
       {/* Logo */}
@@ -28,31 +36,22 @@ export default function AppSidebar() {
 
       {/* Chat List */}
       <div className="flex-1 space-y-2 overflow-y-auto px-3">
-
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-        >
-          <MessageSquare className="mr-2 h-4 w-4" />
-          FastAPI
-        </Button>
-
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-        >
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Python
-        </Button>
-
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-        >
-          <MessageSquare className="mr-2 h-4 w-4" />
-          RAG
-        </Button>
-
+        {chats.length === 0 ? (
+          <p className="px-2 text-sm text-muted-foreground">
+            No chats yet
+          </p>
+        ) : (
+          chats.map((chat) => (
+            <Button
+              key={chat.id}
+              variant="ghost"
+              className="w-full justify-start"
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              {chat.title}
+            </Button>
+          ))
+        )}
       </div>
 
       {/* Footer */}
