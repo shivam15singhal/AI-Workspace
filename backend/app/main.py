@@ -2,11 +2,13 @@ from fastapi import FastAPI
 
 from app.database.database import Base, engine
 import app.models
+Base.metadata.create_all(bind=engine)
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
 from app.api.message import router as message_router
 from fastapi.middleware.cors import CORSMiddleware
-# Base.metadata.create_all(bind=engine)
+
+from app.api.document import router as document_router
 
 app = FastAPI(
     title="AI Workspace API",
@@ -25,6 +27,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(message_router)
+app.include_router(document_router)
 
 
 @app.get("/")

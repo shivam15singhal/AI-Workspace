@@ -1,3 +1,4 @@
+from email.mime import text
 from pyexpat.errors import messages
 
 from app.llm.ollama import OllamaLLM
@@ -25,3 +26,9 @@ class LLMService:
         messages: list[dict],
     ):
         return self.llm.stream_response(messages)
+    
+    def embedding(
+    self,
+    text: str,
+):
+        return self.llm.generate_embedding(text)

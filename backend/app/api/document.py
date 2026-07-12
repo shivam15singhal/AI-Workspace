@@ -1,0 +1,65 @@
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.orm import Session
+
+from app.auth.dependencies import get_current_user
+from app.database.database import get_db
+from app.models.user import User
+
+from app.schemas.document import DocumentResponse
+from app.services.document_service import (
+    save_document,
+    get_user_documents,
+    delete_document,
+)
+
+from typing import List
+
+
+router = APIRouter(
+    prefix="/api/documents",
+    tags=["Documents"],
+)
+
+
+@router.post(
+    "/upload",
+    response_model=DocumentResponse,
+)
+def upload_document(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return save_document(
+        db=db,
+        file=file,
+        current_user=current_user,
+    )
+
+
+
+@router.get(
+    "",
+    response_model=List[DocumentResponse],
+)
+def list_documents(
+
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_user_documents(
+        db=db,
+        current_user=current_user,
+    )
+
+@router.delete("/{document_id}")
+def remove_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return delete_document(
+        db=db,
+        document_id=document_id,
+        current_user=current_user,
+    )

@@ -1,5 +1,3 @@
-
-
 from urllib import response
 
 from httpx import stream
@@ -69,3 +67,13 @@ class OllamaLLM(BaseLLM):
 
         for chunk in stream:
             yield chunk["message"]["content"]
+
+    def generate_embedding(
+    self,
+    text: str,
+):
+        response = ollama.embeddings(
+        model="bge-m3",
+        prompt=text,
+    )
+        return response["embedding"]

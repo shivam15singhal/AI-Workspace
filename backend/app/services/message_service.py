@@ -10,6 +10,7 @@ from app.services.chat_service import (
     generate_chat_title,
     get_owned_chat,
 )
+from app.services.retrieval_service import retrieve_context
 
 # Create one LLM instance for the whole module
 llm_service = LLMService()
@@ -145,6 +146,33 @@ def create_message(
         db=db,
         chat_id=message_data.chat_id,
     )
+      
+    context = retrieve_context(
+    query=message_data.content,
+    user_id=current_user.id,
+)
+
+    conversation.insert(
+    1,
+    {
+        "role": "system",
+        "content": f"""
+    You are an AI assistant.
+
+    Answer ONLY using the provided context.
+
+    If the answer is not present in the context, reply:
+
+    "I couldn't find that information in the uploaded documents."
+
+    Do not make up facts.
+
+    Context:
+
+    {context}
+""",
+    },
+)
 
     # Generate AI response
     ai_response = generate_ai_response(conversation)
