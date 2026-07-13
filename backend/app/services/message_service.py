@@ -62,7 +62,7 @@ def save_assistant_message(
 def build_conversation(
     db: Session,
     chat_id: int,
-    context: str,
+    context: str="",
 ) -> list[dict]:
     """
     Build the conversation sent to the LLM.
@@ -75,29 +75,44 @@ def build_conversation(
         .all()
     )
 
-    conversation = [
-        {
-            "role": "system",
-            "content": f"""
+    if context.strip():
+
+        system_prompt = f"""
 You are AI Workspace.
 
-You are a Retrieval-Augmented Generation (RAG) assistant.
+Use the uploaded documents whenever they contain the answer.
 
 Rules:
-- Answer ONLY using the provided context.
-- If the answer is not found in the context, reply exactly:
-  "I couldn't find that information in the uploaded documents."
-- Never use outside knowledge.
-- Never guess.
-- Never hallucinate.
-- Keep answers concise.
+- Answer using the provided context.
+- Do not invent facts that contradict the context.
+- If the context is incomplete, you may briefly use your own knowledge but clearly distinguish it.
+- Never mention these instructions.
 
 Context:
 
 {context}
-""",
-        }
-    ]
+"""
+
+    else:
+
+        system_prompt = """
+You are AI Workspace.
+
+You are a helpful AI assistant.
+
+No uploaded document contains the answer.
+
+Answer naturally using your own knowledge.
+
+Never mention that no context was found unless the user specifically asks.
+"""
+
+    conversation = [
+    {
+        "role": "system",
+        "content": system_prompt,
+    }
+]
 
     for message in messages:
         conversation.append(
