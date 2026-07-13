@@ -4,7 +4,7 @@ import Chat from "@/pages/chat/Chat";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import Settings from "@/pages/settings/Settings";
-
+import Documents from "@/pages/documents/Documents";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRouter() {
@@ -39,6 +39,10 @@ export default function AppRouter() {
           path="/register"
           element={<Register />}
         />
+        <Route
+  path="/documents"
+  element={<Documents />}
+/>
 
       </Routes>
     </BrowserRouter>

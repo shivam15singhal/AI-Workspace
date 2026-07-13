@@ -12,7 +12,6 @@ from app.services.chat_service import (
 )
 from app.services.retrieval_service import retrieve_context
 
-# Create one LLM instance for the whole module
 llm_service = LLMService()
 
 
@@ -22,8 +21,9 @@ def save_user_message(
     content: str,
 ) -> Message:
     """
-    Save a user's message to the database.
+    Save a user's message.
     """
+
     message = Message(
         chat_id=chat_id,
         role=MessageRole.USER,
@@ -43,8 +43,9 @@ def save_assistant_message(
     content: str,
 ) -> Message:
     """
-    Save the AI assistant's response to the database.
+    Save the assistant's response.
     """
+
     message = Message(
         chat_id=chat_id,
         role=MessageRole.ASSISTANT,
@@ -58,21 +59,13 @@ def save_assistant_message(
     return message
 
 
-def generate_ai_response(
-    conversation: list[dict],
-) -> str:
-    """
-    Generate an AI response using the configured LLM.
-    """
-    return llm_service.generate(conversation)
-
-
-def get_conversation_messages(
+def build_conversation(
     db: Session,
     chat_id: int,
+    context: str,
 ) -> list[dict]:
     """
-    Convert database messages into Ollama/OpenAI chat format.
+    Build the conversation sent to the LLM.
     """
 
     messages = (
@@ -85,10 +78,24 @@ def get_conversation_messages(
     conversation = [
         {
             "role": "system",
-            "content": (
-                "You are AI Workspace, a helpful AI assistant. "
-                "Answer clearly and accurately."
-            ),
+            "content": f"""
+You are AI Workspace.
+
+You are a Retrieval-Augmented Generation (RAG) assistant.
+
+Rules:
+- Answer ONLY using the provided context.
+- If the answer is not found in the context, reply exactly:
+  "I couldn't find that information in the uploaded documents."
+- Never use outside knowledge.
+- Never guess.
+- Never hallucinate.
+- Keep answers concise.
+
+Context:
+
+{context}
+""",
         }
     ]
 
@@ -103,92 +110,70 @@ def get_conversation_messages(
     return conversation
 
 
+def generate_ai_response(
+    conversation: list[dict],
+) -> str:
+    """
+    Generate a complete AI response.
+    """
+
+    return llm_service.generate(conversation)
+
+
 def create_message(
     db: Session,
     message_data: MessageCreate,
     current_user: User,
 ) -> Message:
     """
-    Complete message pipeline.
-
-    1. Verify chat ownership
-    2. Save user message
-    3. Generate chat title (first message only)
-    4. Build conversation
-    5. Generate AI response
-    6. Save assistant response
-    7. Return assistant response
+    Generate a complete (non-streaming) AI response.
     """
 
-    # Verify ownership and fetch chat
     chat = get_owned_chat(
         db=db,
         chat_id=message_data.chat_id,
         current_user=current_user,
     )
 
-    # Save user's message
     save_user_message(
         db=db,
         chat_id=message_data.chat_id,
         content=message_data.content,
     )
 
-    # Generate title if it's a new chat
     generate_chat_title(
         db=db,
         chat=chat,
         first_message=message_data.content,
     )
 
-    # Build conversation history
-    conversation = get_conversation_messages(
+    context, sources = retrieve_context(
+        query=message_data.content,
+        user_id=current_user.id,
+    )
+
+    conversation = build_conversation(
         db=db,
         chat_id=message_data.chat_id,
+        context=context,
     )
-      
-    context = retrieve_context(
-    query=message_data.content,
-    user_id=current_user.id,
-)
 
-    conversation.insert(
-    1,
-    {
-        "role": "system",
-        "content": f"""
-    You are an AI assistant.
-
-    Answer ONLY using the provided context.
-
-    If the answer is not present in the context, reply:
-
-    "I couldn't find that information in the uploaded documents."
-
-    Do not make up facts.
-
-    Context:
-
-    {context}
-""",
-    },
-)
-
-    # Generate AI response
     ai_response = generate_ai_response(conversation)
 
-    # Save assistant message
-    assistant_message = save_assistant_message(
+    if sources:
+        ai_response += "\n\n---\n\nSources:\n"
+
+        for source in sources:
+            ai_response += f"- {source}\n"
+
+    return save_assistant_message(
         db=db,
         chat_id=message_data.chat_id,
         content=ai_response,
     )
 
-    return assistant_message
-
 
 def get_chat_messages(
-        
     db: Session,
     chat_id: int,
     current_user: User,
@@ -197,7 +182,6 @@ def get_chat_messages(
     Return all messages for a chat.
     """
 
-    # Verify ownership
     get_owned_chat(
         db=db,
         chat_id=chat_id,
@@ -209,13 +193,14 @@ def get_chat_messages(
         .filter(Message.chat_id == chat_id)
         .order_by(Message.created_at.asc())
         .all()
-    ) 
+    )
+
 
 def generate_ai_response_stream(
     conversation: list[dict],
 ) -> Generator[str, None, None]:
     """
-    Stream an AI response.
+    Stream AI response.
     """
 
     return llm_service.stream(conversation)
@@ -227,34 +212,36 @@ def stream_ai_response(
     current_user: User,
 ) -> Generator[str, None, None]:
     """
-    Stream an AI response while collecting the full text.
+    Stream an AI response while saving it afterwards.
     """
 
-    # Verify ownership
     chat = get_owned_chat(
         db=db,
         chat_id=message_data.chat_id,
         current_user=current_user,
     )
 
-    # Save user message
     save_user_message(
         db=db,
         chat_id=message_data.chat_id,
         content=message_data.content,
     )
 
-    # Generate title
     generate_chat_title(
         db=db,
         chat=chat,
         first_message=message_data.content,
     )
 
-    # Build conversation
-    conversation = get_conversation_messages(
+    context, sources = retrieve_context(
+        query=message_data.content,
+        user_id=current_user.id,
+    )
+
+    conversation = build_conversation(
         db=db,
         chat_id=message_data.chat_id,
+        context=context,
     )
 
     full_response = ""
@@ -263,7 +250,12 @@ def stream_ai_response(
         full_response += chunk
         yield chunk
 
-    # Save assistant response after streaming completes
+    if sources:
+        full_response += "\n\n---\n\nSources:\n"
+
+        for source in sources:
+            full_response += f"- {source}\n"
+
     save_assistant_message(
         db=db,
         chat_id=message_data.chat_id,
