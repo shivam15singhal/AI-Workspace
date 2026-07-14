@@ -6,6 +6,8 @@ import type { Message } from "@/types/message";
 import {
   getChats,
   createChat,
+  renameChat,
+  deleteChat,
 } from "@/services/chat/chatService";
 
 import {
@@ -25,7 +27,18 @@ type ChatState = {
 
   createNewChat: () => Promise<void>;
 
-  selectChat: (chat: Chat) => Promise<void>;
+  renameCurrentChat: (
+    chatId: number,
+    title: string,
+  ) => Promise<void>;
+
+  deleteCurrentChat: (
+    chatId: number,
+  ) => Promise<void>;
+
+  selectChat: (
+    chat: Chat,
+  ) => Promise<void>;
 
   sendMessage: (
     content: string,
@@ -40,10 +53,13 @@ export const useChatStore = create<ChatState>((set) => ({
   messages: [],
 
   loading: false,
+
   isGenerating: false,
 
   fetchChats: async () => {
-    set({ loading: true });
+    set({
+      loading: true,
+    });
 
     try {
       const chats = await getChats();
@@ -54,14 +70,18 @@ export const useChatStore = create<ChatState>((set) => ({
       });
 
       if (chats.length > 0) {
-        const messages = await getMessages(chats[0].id);
+        const messages = await getMessages(
+          chats[0].id,
+        );
 
         set({
           messages,
         });
       }
     } finally {
-      set({ loading: false });
+      set({
+        loading: false,
+      });
     }
   },
 
@@ -81,6 +101,55 @@ export const useChatStore = create<ChatState>((set) => ({
       selectedChat: newChat,
       messages: [],
     }));
+  },
+
+  renameCurrentChat: async (
+    chatId,
+    title,
+  ) => {
+    const updated = await renameChat(
+      chatId,
+      title,
+    );
+
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat.id === chatId
+          ? updated
+          : chat,
+      ),
+
+      selectedChat:
+        state.selectedChat?.id === chatId
+          ? updated
+          : state.selectedChat,
+    }));
+  },
+
+  deleteCurrentChat: async (
+    chatId,
+  ) => {
+    await deleteChat(chatId);
+
+    set((state) => {
+      const chats = state.chats.filter(
+        (chat) => chat.id !== chatId,
+      );
+
+      return {
+        chats,
+
+        selectedChat:
+          state.selectedChat?.id === chatId
+            ? chats[0] ?? null
+            : state.selectedChat,
+
+        messages:
+          state.selectedChat?.id === chatId
+            ? []
+            : state.messages,
+      };
+    });
   },
 
   selectChat: async (chat) => {
@@ -110,42 +179,51 @@ export const useChatStore = create<ChatState>((set) => ({
       chat_id: state.selectedChat.id,
       role: "assistant",
       content: "",
+      streaming: true,
       created_at: new Date().toISOString(),
     };
-    try{
 
-    set({
-      messages: [
-        ...state.messages,
-        userMessage,
-        assistantMessage,
-      ],
-    });
-    set({
-  isGenerating: true,
-});
+    try {
+      set({
+        messages: [
+          ...state.messages,
+          userMessage,
+          assistantMessage,
+        ],
+      });
 
-    await streamMessage(
-      state.selectedChat.id,
-      content,
-      (chunk) => {
-        set((state) => ({
-          messages: state.messages.map((message) =>
-            message.id === assistantMessage.id
-              ? {
-                  ...message,
-                  content: message.content + chunk,
-                }
-              : message,
-          ),
-        }));
-      },
-    );
-    set({
-  isGenerating: false,
-});
-    }catch (error) {
-      console.error("Error streaming message:", error);
+      set({
+        isGenerating: true,
+      });
+
+      await streamMessage(
+        state.selectedChat.id,
+        content,
+        (chunk) => {
+          set((state) => ({
+            messages: state.messages.map((message) =>
+              message.id === assistantMessage.id
+                ? {
+                    ...message,
+                    streaming: false,
+                    content:
+                      message.content + chunk,
+                  }
+                : message,
+            ),
+          }));
+        },
+      );
+
+      set({
+        isGenerating: false,
+      });
+    } catch (error) {
+      console.error(
+        "Error streaming message:",
+        error,
+      );
+
       set({
         isGenerating: false,
       });

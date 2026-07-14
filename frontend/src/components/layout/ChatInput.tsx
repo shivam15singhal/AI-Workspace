@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Paperclip, SendHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { useChatStore } from "@/store/chatStore";
 
 export default function ChatInput() {
   const [message, setMessage] = useState("");
+  const textareaRef =useRef<HTMLTextAreaElement>(null);
 
   const sendMessage = useChatStore(
     (state) => state.sendMessage,
@@ -30,17 +31,29 @@ export default function ChatInput() {
         <Button
           variant="ghost"
           size="icon"
+          className="rounded-full"
         >
           <Paperclip className="h-5 w-5" />
         </Button>
 
         <Textarea
+        ref={textareaRef}
           value={message}
-          onChange={(e) =>
-            setMessage(e.target.value)
-          }
+          onChange={(e) => {
+  setMessage(e.target.value);
+
+  e.target.style.height = "auto";
+  e.target.style.height =
+    `${e.target.scrollHeight}px`;
+}}
           placeholder="Type your message..."
-          className="min-h-15 resize-none border-0 shadow-none focus-visible:ring-0"
+          className="min-h-13
+max-h-60
+resize-none
+border-0
+shadow-none
+focus-visible:ring-0
+overflow-y-auto"
           onKeyDown={async (e) => {
             if (
               e.key === "Enter" &&
@@ -52,9 +65,16 @@ export default function ChatInput() {
           }}
         />
 
-        <Button
+        <Button 
+        className="
+transition-all
+duration-200
+hover:scale-105
+active:scale-95
+"
           size="icon"
           onClick={handleSend}
+          disabled={!message.trim()}
         >
           <SendHorizontal className="h-5 w-5" />
         </Button>

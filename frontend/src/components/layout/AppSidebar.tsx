@@ -1,94 +1,63 @@
-import { useEffect } from "react";
-import {
-  Bot,
-  Plus,
-  Settings,
-  MessageSquare,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+
+import SidebarHeader from "@/components/sidebar/SidebarHeader";
+import SidebarSearch from "@/components/sidebar/SidebarSearch";
+import SidebarFooter from "@/components/sidebar/SidebarFooter";
+import ChatList from "@/components/sidebar/ChatList";
+
 import { useChatStore } from "@/store/chatStore";
-import { FileText } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export default function AppSidebar() {
   const {
-  chats,
-  fetchChats,
-  createNewChat,
-  selectedChat,
-  selectChat,
-} = useChatStore();
+    chats,
+    fetchChats,
+    createNewChat,
+    selectedChat,
+    selectChat,
+  } = useChatStore();
+
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchChats();
   }, [fetchChats]);
 
+  const filteredChats = chats.filter((chat) =>
+    chat.title
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
   return (
     <aside className="flex h-screen w-72 flex-col border-r bg-background">
-      {/* Logo */}
-      <div className="flex items-center gap-2 border-b p-5">
-        <Bot className="h-7 w-7 text-primary" />
-        <h1 className="text-lg font-bold">
-          AI Workspace
-        </h1>
-      </div>
+      <SidebarHeader />
 
-      {/* New Chat */}
       <div className="p-4">
         <Button
-  className="w-full justify-start"
-  onClick={createNewChat}
->
+          className="w-full justify-start"
+          onClick={createNewChat}
+        >
           <Plus className="mr-2 h-4 w-4" />
           New Chat
         </Button>
       </div>
 
-      {/* Chat List */}
-      <div className="flex-1 space-y-2 overflow-y-auto px-3">
-        {chats.length === 0 ? (
-          <p className="px-2 text-sm text-muted-foreground">
-            No chats yet
-          </p>
-        ) : (
-          chats.map((chat) => (
-            <Button
-  key={chat.id}
-  variant={
-    selectedChat?.id === chat.id
-      ? "secondary"
-      : "ghost"
-  }
-  className="w-full justify-start"
-  onClick={() => selectChat(chat)}
->
-              <MessageSquare className="mr-2 h-4 w-4" />
-              {chat.title}
-            </Button>
-          ))
-        )}
-      </div>
+      <SidebarSearch
+        value={search}
+        onChange={setSearch}
+      />
 
-      {/* Footer */}
-      <div className="border-t p-4">
-        <Link to="/documents">
-  <Button
-    variant="ghost"
-    className="w-full justify-start"
-  >
-    <FileText className="mr-2 h-4 w-4" />
-    Documents
-  </Button>
-</Link>
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </Button>
-      </div>
+      <ChatList
+        chats={filteredChats}
+        selectedChat={selectedChat}
+        search={search}
+        onSelect={selectChat}
+      />
+
+      <SidebarFooter />
     </aside>
   );
 }
