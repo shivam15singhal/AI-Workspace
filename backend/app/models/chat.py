@@ -1,6 +1,12 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -9,17 +15,33 @@ from app.database.database import Base
 class Chat(Base):
     __tablename__ = "chats"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
 
     title = Column(
-    String(255),
-    nullable=False,
-    default="New Chat"
-)
+        String(255),
+        nullable=False,
+        default="New Chat",
+    )
 
     user_id = Column(
         Integer,
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    workspace_id = Column(
+        Integer,
+        ForeignKey(
+            "workspaces.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     )
 
@@ -40,8 +62,14 @@ class Chat(Base):
         "User",
         back_populates="chats",
     )
+
+    workspace = relationship(
+        "Workspace",
+        back_populates="chats",
+    )
+
     messages = relationship(
-    "Message",
-    back_populates="chat",
-    cascade="all, delete-orphan",
-)
+        "Message",
+        back_populates="chat",
+        cascade="all, delete-orphan",
+    )

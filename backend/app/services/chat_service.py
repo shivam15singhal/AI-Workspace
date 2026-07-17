@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
+from app.models.workspace import Workspace
 from app.models.chat import Chat
 from app.models.user import User
 from app.llm.service import LLMService
@@ -34,10 +34,28 @@ def get_owned_chat(
 def create_chat(
     db: Session,
     current_user: User,
+    workspace_id: int,
 ) -> Chat:
+
+    workspace = (
+        db.query(Workspace)
+        .filter(
+            Workspace.id == workspace_id,
+            Workspace.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not workspace:
+        raise HTTPException(
+            status_code=404,
+            detail="Workspace not found",
+        )
+
     chat = Chat(
         title="New Chat",
         user_id=current_user.id,
+        workspace_id=workspace.id,
     )
 
     db.add(chat)
@@ -50,14 +68,18 @@ def create_chat(
 def get_user_chats(
     db: Session,
     current_user: User,
+    workspace_id: int,
 ) -> list[Chat]:
+
     return (
         db.query(Chat)
-        .filter(Chat.user_id == current_user.id)
+        .filter(
+            Chat.user_id == current_user.id,
+            Chat.workspace_id == workspace_id,
+        )
         .order_by(Chat.updated_at.desc())
         .all()
     )
-
 
 def get_chat_by_id(
     db: Session,

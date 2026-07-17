@@ -1,11 +1,13 @@
 import api from "@/api/axios";
-import type { AxiosProgressEvent } from "axios";
 
 import type { Document } from "@/types/document";
 
 export async function uploadDocument(
   file: File,
-  onProgress?: (progress: number) => void,
+  workspaceId: number,
+  onProgress?: (
+    progress: number,
+  ) => void,
 ): Promise<Document> {
   const formData = new FormData();
 
@@ -15,21 +17,31 @@ export async function uploadDocument(
     "/api/documents/upload",
     formData,
     {
+      params: {
+        workspace_id: workspaceId,
+      },
+
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type":
+          "multipart/form-data",
       },
 
       onUploadProgress: (
-        progressEvent: AxiosProgressEvent,
+        progressEvent,
       ) => {
-        if (!progressEvent.total) return;
+        if (
+          !progressEvent.total ||
+          !onProgress
+        )
+          return;
 
         const progress = Math.round(
-          (progressEvent.loaded * 100) /
-            progressEvent.total,
+          (progressEvent.loaded /
+            progressEvent.total) *
+            100,
         );
 
-        onProgress?.(progress);
+        onProgress(progress);
       },
     },
   );
@@ -37,9 +49,16 @@ export async function uploadDocument(
   return response.data;
 }
 
-export async function getDocuments(): Promise<Document[]> {
+export async function getDocuments(
+  workspaceId: number,
+): Promise<Document[]> {
   const response = await api.get(
     "/api/documents",
+    {
+      params: {
+        workspace_id: workspaceId,
+      },
+    },
   );
 
   return response.data;
@@ -47,7 +66,7 @@ export async function getDocuments(): Promise<Document[]> {
 
 export async function deleteDocument(
   id: number,
-): Promise<void> {
+) {
   await api.delete(
     `/api/documents/${id}`,
   );

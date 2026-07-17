@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { toast } from "sonner";
 
+import { useWorkspaceStore } from "./workspaceStore";
+
 import type { Document } from "@/types/document";
 
 import {
@@ -15,7 +17,9 @@ type DocumentState = {
   uploadProgress: number;
   isUploading: boolean;
 
-  pollingInterval: ReturnType<typeof setInterval> | null;
+  pollingInterval: ReturnType<
+    typeof setInterval
+  > | null;
 
   fetchDocuments: () => Promise<void>;
 
@@ -37,7 +41,22 @@ export const useDocumentStore =
     pollingInterval: null,
 
     fetchDocuments: async () => {
-      const documents = await getDocuments();
+      const workspace =
+        useWorkspaceStore.getState()
+          .selectedWorkspace;
+
+      if (!workspace) {
+        set({
+          documents: [],
+        });
+
+        return;
+      }
+
+      const documents =
+        await getDocuments(
+          workspace.id,
+        );
 
       set({
         documents,
@@ -51,12 +70,26 @@ export const useDocumentStore =
           uploadProgress: 0,
         });
 
+        const workspace =
+          useWorkspaceStore.getState()
+            .selectedWorkspace;
+
+        if (!workspace) {
+          toast.error(
+            "Please select a workspace.",
+          );
+
+          return;
+        }
+
         const document =
           await uploadDocument(
             file,
+            workspace.id,
             (progress) => {
               set({
-                uploadProgress: progress,
+                uploadProgress:
+                  progress,
               });
             },
           );
@@ -70,13 +103,13 @@ export const useDocumentStore =
             document,
             ...state.documents,
           ],
+
           uploadProgress: 100,
         }));
 
-        const state =
-          useDocumentStore.getState();
-
-        state.startPolling();
+        useDocumentStore
+          .getState()
+          .startPolling();
       } catch (error) {
         toast.error(
           "Failed to upload document.",
@@ -125,8 +158,27 @@ export const useDocumentStore =
       const interval = setInterval(
         async () => {
           try {
+            const workspace =
+              useWorkspaceStore.getState()
+                .selectedWorkspace;
+
+            if (!workspace) {
+              clearInterval(
+                interval,
+              );
+
+              set({
+                pollingInterval:
+                  null,
+              });
+
+              return;
+            }
+
             const documents =
-              await getDocuments();
+              await getDocuments(
+                workspace.id,
+              );
 
             set({
               documents,
@@ -147,7 +199,8 @@ export const useDocumentStore =
               );
 
               set({
-                pollingInterval: null,
+                pollingInterval:
+                  null,
               });
             }
           } catch (error) {
@@ -156,7 +209,8 @@ export const useDocumentStore =
             clearInterval(interval);
 
             set({
-              pollingInterval: null,
+              pollingInterval:
+                null,
             });
           }
         },

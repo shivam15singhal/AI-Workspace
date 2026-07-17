@@ -58,5 +58,20 @@ class Document(Base):
         ForeignKey("users.id"),
         nullable=False,
     )
+    workspace_id = Column(
+    Integer,
+    ForeignKey(
+        "workspaces.id",
+        ondelete="CASCADE",
+    ),
+    nullable=False,
+    )
 
-    user = relationship("User")
+    user = relationship(
+    "User",
+    )
+
+    workspace = relationship(
+    "Workspace",
+    back_populates="documents",
+    )

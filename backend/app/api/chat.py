@@ -18,19 +18,27 @@ router = APIRouter(
 
 @router.post("", response_model=ChatResponse)
 def create_new_chat(
-    _: ChatCreate,
+    chat_data: ChatCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return create_chat(db, current_user)
+    return create_chat(
+        db=db,
+        current_user=current_user,
+        workspace_id=chat_data.workspace_id,
+    )
 
 @router.get("", response_model=List[ChatResponse])
 def get_chats(
+    workspace_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_user_chats(db, current_user)
-
+    return get_user_chats(
+        db=db,
+        current_user=current_user,
+        workspace_id=workspace_id,
+    )
 
 @router.get("/{chat_id}", response_model=ChatResponse)
 def get_chat(

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-
+import WorkspaceSwitcher from "@/components/workspace/WorkspaceSwitcher";
 import { Button } from "@/components/ui/button";
 
 import SidebarHeader from "@/components/sidebar/SidebarHeader";
@@ -34,6 +34,7 @@ export default function AppSidebar() {
   return (
     <aside className="flex h-screen w-72 flex-col border-r bg-background">
       <SidebarHeader />
+      <WorkspaceSwitcher />
 
       <div className="p-4">
         <Button

@@ -5,6 +5,7 @@ import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import Settings from "@/pages/settings/Settings";
 import Documents from "@/pages/documents/Documents";
+import Workspaces from "@/pages/workspace/Workspaces";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRouter() {
@@ -42,6 +43,10 @@ export default function AppRouter() {
         <Route
   path="/documents"
   element={<Documents />}
+/>
+<Route
+  path="/workspaces"
+  element={<Workspaces />}
 />
 
       </Routes>

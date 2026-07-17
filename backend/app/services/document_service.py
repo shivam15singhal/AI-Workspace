@@ -1,12 +1,13 @@
 from pathlib import Path
 import shutil
 import uuid
-
+from app.models.workspace import Workspace
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.models.document import Document
 from app.models.user import User
+from app.models.workspace import Workspace
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -23,12 +24,27 @@ def save_document(
     db: Session,
     file: UploadFile,
     current_user: User,
+    workspace_id: int,
 ):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(
             status_code=400,
             detail="Unsupported file type",
         )
+    workspace = (
+    db.query(Workspace)
+    .filter(
+        Workspace.id == workspace_id,
+        Workspace.user_id == current_user.id,
+    )
+    .first() 
+)
+
+    if not workspace :
+        raise HTTPException(
+        status_code=404,
+        detail="Workspace not found",
+    )
 
     user_dir = UPLOAD_DIR / f"user_{current_user.id}"
     user_dir.mkdir(exist_ok=True)
@@ -48,6 +64,7 @@ def save_document(
         size=file.size,
         status="uploading",
         user_id=current_user.id,
+        workspace_id=workspace.id,
     )
 
     db.add(document)
@@ -60,10 +77,14 @@ def save_document(
 def get_user_documents(
     db: Session,
     current_user: User,
+    workspace_id: int,
 ):
     return (
         db.query(Document)
-        .filter(Document.user_id == current_user.id)
+        .filter(
+            Document.user_id == current_user.id,
+            Document.workspace_id == workspace_id,
+        )
         .order_by(Document.id.desc())
         .all()
     )

@@ -36,6 +36,7 @@ router = APIRouter(
 )
 def upload_document(
     background_tasks: BackgroundTasks,
+    workspace_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -44,6 +45,7 @@ def upload_document(
         db=db,
         file=file,
         current_user=current_user,
+        workspace_id=workspace_id,
     )
 
     background_tasks.add_task(
@@ -59,12 +61,15 @@ def upload_document(
     response_model=List[DocumentResponse],
 )
 def list_documents(
+    workspace_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     return get_user_documents(
         db=db,
         current_user=current_user,
+        workspace_id=workspace_id,
+
     )
 
 

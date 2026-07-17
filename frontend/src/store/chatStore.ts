@@ -1,5 +1,5 @@
 import { create } from "zustand";
-
+import { useWorkspaceStore } from "@/store/workspaceStore";
 import type { Chat } from "@/types/chat";
 import type { Message } from "@/types/message";
 
@@ -62,7 +62,23 @@ export const useChatStore = create<ChatState>((set) => ({
     });
 
     try {
-      const chats = await getChats();
+      const workspace =
+  useWorkspaceStore.getState()
+    .selectedWorkspace;
+
+if (!workspace) {
+  set({
+    chats: [],
+    selectedChat: null,
+    messages: [],
+  });
+
+  return;
+}
+
+const chats = await getChats(
+  workspace.id,
+);
 
       set({
         chats,
@@ -94,7 +110,16 @@ export const useChatStore = create<ChatState>((set) => ({
   },
 
   createNewChat: async () => {
-    const newChat = await createChat();
+    const workspace =
+  useWorkspaceStore.getState()
+    .selectedWorkspace;
+
+if (!workspace) return;
+
+const newChat =
+  await createChat(
+    workspace.id,
+  );
 
     set((state) => ({
       chats: [newChat, ...state.chats],

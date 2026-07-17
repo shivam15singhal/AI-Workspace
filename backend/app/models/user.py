@@ -12,10 +12,16 @@ class User(Base):
     username = Column(String, nullable=False)
 
     email = Column(String, unique=True, nullable=False)
+    workspaces = relationship(
+    "Workspace",
+    back_populates="user",
+    cascade="all, delete-orphan",
+)
 
     hashed_password = Column(String, nullable=False)
     chats = relationship(
     "Chat",
     back_populates="user",
     cascade="all, delete-orphan",
+    
 )

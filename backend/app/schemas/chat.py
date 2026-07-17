@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from pydantic import BaseModel,Field
-from typing import List
+from pydantic import BaseModel, Field
+
 
 class ChatCreate(BaseModel):
-    pass
+    workspace_id: int
 
 
 class ChatResponse(BaseModel):
@@ -14,6 +14,7 @@ class ChatResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class ChatUpdate(BaseModel):
     title: str = Field(
