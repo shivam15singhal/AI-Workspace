@@ -21,6 +21,7 @@ type ChatState = {
   messages: Message[];
   loading: boolean;
   isGenerating: boolean;
+  abortController: AbortController | null;
 
   fetchChats: () => Promise<void>;
   fetchMessages: (chatId: number) => Promise<void>;
@@ -43,9 +44,11 @@ type ChatState = {
   sendMessage: (
     content: string,
   ) => Promise<void>;
+
+  stopGeneration: () => void;
 };
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<ChatState>((set, get) => ({
   chats: [],
 
   selectedChat: null,
@@ -56,6 +59,8 @@ export const useChatStore = create<ChatState>((set) => ({
 
   isGenerating: false,
 
+  abortController: null,
+
   fetchChats: async () => {
     set({
       loading: true,
@@ -63,22 +68,21 @@ export const useChatStore = create<ChatState>((set) => ({
 
     try {
       const workspace =
-  useWorkspaceStore.getState()
-    .selectedWorkspace;
+        useWorkspaceStore.getState().selectedWorkspace;
 
-if (!workspace) {
-  set({
-    chats: [],
-    selectedChat: null,
-    messages: [],
-  });
+      if (!workspace) {
+        set({
+          chats: [],
+          selectedChat: null,
+          messages: [],
+        });
 
-  return;
-}
+        return;
+      }
 
-const chats = await getChats(
-  workspace.id,
-);
+      const chats = await getChats(
+        workspace.id,
+      );
 
       set({
         chats,
@@ -111,15 +115,13 @@ const chats = await getChats(
 
   createNewChat: async () => {
     const workspace =
-  useWorkspaceStore.getState()
-    .selectedWorkspace;
+      useWorkspaceStore.getState().selectedWorkspace;
 
-if (!workspace) return;
+    if (!workspace) return;
 
-const newChat =
-  await createChat(
-    workspace.id,
-  );
+    const newChat = await createChat(
+      workspace.id,
+    );
 
     set((state) => ({
       chats: [newChat, ...state.chats],
@@ -186,10 +188,23 @@ const newChat =
     });
   },
 
+  stopGeneration: () => {
+    const controller = get().abortController;
+
+    controller?.abort();
+
+    set({
+      abortController: null,
+      isGenerating: false,
+    });
+  },
+
   sendMessage: async (content) => {
-    const state = useChatStore.getState();
+    const state = get();
 
     if (!state.selectedChat) return;
+
+    let wasAborted = false;
 
     const userMessage: Message = {
       id: Date.now(),
@@ -208,6 +223,8 @@ const newChat =
       created_at: new Date().toISOString(),
     };
 
+    const controller = new AbortController();
+
     try {
       set({
         messages: [
@@ -215,10 +232,8 @@ const newChat =
           userMessage,
           assistantMessage,
         ],
-      });
-
-      set({
         isGenerating: true,
+        abortController: controller,
       });
 
       await streamMessage(
@@ -238,28 +253,51 @@ const newChat =
             ),
           }));
         },
+        controller.signal,
       );
 
       set({
         isGenerating: false,
+        abortController: null,
       });
     } catch (error) {
-      console.error(
-        "Error streaming message:",
-        error,
-      );
+      if (
+        error instanceof DOMException &&
+        error.name === "AbortError"
+      ) {
+        wasAborted = true;
+
+        set((state) => ({
+          messages: state.messages.map((message) =>
+            message.id === assistantMessage.id
+              ? {
+                  ...message,
+                  streaming: false,
+                }
+              : message,
+          ),
+        }));
+      } else {
+        console.error(
+          "Error streaming message:",
+          error,
+        );
+      }
 
       set({
         isGenerating: false,
+        abortController: null,
       });
     }
 
-    const messages = await getMessages(
-      state.selectedChat.id,
-    );
+    if (!wasAborted) {
+      const messages = await getMessages(
+        state.selectedChat.id,
+      );
 
-    set({
-      messages,
-    });
+      set({
+        messages,
+      });
+    }
   },
 }));

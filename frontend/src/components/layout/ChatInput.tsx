@@ -10,9 +10,11 @@ export default function ChatInput() {
   const [message, setMessage] = useState("");
   const textareaRef =useRef<HTMLTextAreaElement>(null);
 
-  const sendMessage = useChatStore(
-    (state) => state.sendMessage,
-  );
+  const {
+  sendMessage,
+  stopGeneration,
+  isGenerating,
+} = useChatStore();
 
   async function handleSend() {
     if (!message.trim()) return;
@@ -65,19 +67,23 @@ overflow-y-auto"
           }}
         />
 
-        <Button 
-        className="
-transition-all
-duration-200
-hover:scale-105
-active:scale-95
-"
-          size="icon"
-          onClick={handleSend}
-          disabled={!message.trim()}
-        >
-          <SendHorizontal className="h-5 w-5" />
-        </Button>
+        {isGenerating ? (
+  <Button
+    size="icon"
+    variant="destructive"
+    onClick={stopGeneration}
+  >
+    Stop
+  </Button>
+) : (
+  <Button
+    size="icon"
+    onClick={handleSend}
+    disabled={!message.trim()}
+  >
+    <SendHorizontal className="h-5 w-5" />
+  </Button>
+)}
 
       </div>
     </div>

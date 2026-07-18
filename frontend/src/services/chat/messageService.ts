@@ -30,12 +30,14 @@ export async function streamMessage(
   chatId: number,
   content: string,
   onChunk: (chunk: string) => void,
+  signal: AbortSignal,
 ) {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
     "http://localhost:8000/api/messages/stream",
     {
+      signal,
       method: "POST",
 
       headers: {
