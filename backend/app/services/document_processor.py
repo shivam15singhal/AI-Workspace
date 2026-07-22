@@ -6,7 +6,9 @@ from app.database.database import SessionLocal
 from app.models.document import Document
 
 from app.llm.service import LLMService
-from app.vectorstore.chroma import collection
+from app.vectorstore.chroma import (
+    documents_collection,
+)
 
 from pypdf import PdfReader
 from docx import Document as DocxDocument
@@ -99,7 +101,7 @@ def process_document(
         for index, chunk in enumerate(chunks):
             embedding = llm_service.embedding(chunk)
 
-            collection.add(
+            documents_collection.add(
                 ids=[
                     f"{document.id}_{index}"
                 ],

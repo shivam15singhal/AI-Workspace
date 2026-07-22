@@ -1,5 +1,7 @@
 from app.llm.service import LLMService
-from app.vectorstore.chroma import collection
+from app.vectorstore.chroma import (
+    documents_collection,
+)
 from app.models.document import Document
 from app.database.database import SessionLocal
 
@@ -13,7 +15,7 @@ def retrieve_context(
 ):
     embedding = llm_service.embedding(query)
 
-    results = collection.query(
+    results = documents_collection.query(
         query_embeddings=[embedding],
         n_results=top_k,
         where={

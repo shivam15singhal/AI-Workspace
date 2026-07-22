@@ -10,6 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.workspace import (
     router as workspace_router,
 )
+from app.api.workspace_memory import (
+    router as workspace_memory_router,
+)
 from app.api.document import router as document_router
 
 app = FastAPI(
@@ -32,6 +35,9 @@ app.include_router(message_router)
 app.include_router(document_router)
 app.include_router(
     workspace_router,
+)
+app.include_router(
+    workspace_memory_router,
 )
 
 

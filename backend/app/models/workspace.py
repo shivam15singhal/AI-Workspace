@@ -48,16 +48,19 @@ class Workspace(Base):
         "User",
         back_populates="workspaces",
     )
+
     chats = relationship(
     "Chat",
     back_populates="workspace",
     cascade="all, delete-orphan",
     )
+
     documents = relationship(
     "Document",
     back_populates="workspace",
     cascade="all, delete-orphan",
     )
+
     color = Column(
     String,
     default="#6366F1",
@@ -69,3 +72,9 @@ class Workspace(Base):
     default="folder",
     nullable=False,
     )
+
+    memories = relationship(
+    "WorkspaceMemory",
+    back_populates="workspace",
+    cascade="all, delete-orphan",
+   )

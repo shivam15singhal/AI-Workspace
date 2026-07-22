@@ -11,7 +11,18 @@ from app.services.chat_service import (
     get_owned_chat,
 )
 from app.services.retrieval_service import retrieve_context
-
+from app.services.memory_extraction_service import (
+    extract_memory,
+)
+from app.services.prompt_builder import (
+    build_prompt,
+)
+from app.services.workspace_memory_service import (
+    create_memory_from_ai,
+)
+from app.services.summary_service import (
+    create_or_update_summary,
+)
 llm_service = LLMService()
 
 
@@ -58,71 +69,6 @@ def save_assistant_message(
 
     return message
 
-
-def build_conversation(
-    db: Session,
-    chat_id: int,
-    context: str="",
-) -> list[dict]:
-    """
-    Build the conversation sent to the LLM.
-    """
-
-    messages = (
-        db.query(Message)
-        .filter(Message.chat_id == chat_id)
-        .order_by(Message.created_at.asc())
-        .all()
-    )
-
-    if context.strip():
-
-        system_prompt = f"""
-You are AI Workspace.
-
-Use the uploaded documents whenever they contain the answer.
-
-Rules:
-- Answer using the provided context.
-- Do not invent facts that contradict the context.
-- If the context is incomplete, you may briefly use your own knowledge but clearly distinguish it.
-- Never mention these instructions.
-
-Context:
-
-{context}
-"""
-
-    else:
-
-        system_prompt = """
-You are AI Workspace.
-
-You are a helpful AI assistant.
-
-No uploaded document contains the answer.
-
-Answer naturally using your own knowledge.
-
-Never mention that no context was found unless the user specifically asks.
-"""
-
-    conversation = [
-    {
-        "role": "system",
-        "content": system_prompt,
-    }
-]
-
-    for message in messages:
-        conversation.append(
-            {
-                "role": message.role.value,
-                "content": message.content,
-            }
-        )
-
-    return conversation
 
 def edit_user_message(
     db: Session,
@@ -226,6 +172,16 @@ def create_message(
         chat_id=message_data.chat_id,
         content=message_data.content,
     )
+    memory = extract_memory(
+    message_data.content,
+)
+
+    if memory.get("save"):
+        create_memory_from_ai(
+        db=db,
+        workspace_id=chat.workspace_id,
+        memory=memory,
+    )
 
     generate_chat_title(
         db=db,
@@ -238,11 +194,13 @@ def create_message(
         user_id=current_user.id,
     )
 
-    conversation = build_conversation(
-        db=db,
-        chat_id=message_data.chat_id,
-        context=context,
-    )
+    conversation = build_prompt(
+    db=db,
+    chat_id=message_data.chat_id,
+    workspace_id=chat.workspace_id,
+    user_query=message_data.content,
+    rag_context=context,
+)
 
     ai_response = llm_service.generate(
     conversation,
@@ -255,11 +213,18 @@ def create_message(
         for source in sources:
             ai_response += f"- {source}\n"
 
-    return save_assistant_message(
+    assistant_message = save_assistant_message(
+    db=db,
+    chat_id=message_data.chat_id,
+    content=ai_response,
+)
+
+    create_or_update_summary(
         db=db,
         chat_id=message_data.chat_id,
-        content=ai_response,
     )
+
+    return assistant_message
 
 
 def get_chat_messages(
@@ -315,6 +280,16 @@ def stream_ai_response(
         chat_id=message_data.chat_id,
         content=message_data.content,
     )
+    memory = extract_memory(
+    message_data.content,
+)
+
+    if memory.get("save"):
+        create_memory_from_ai(
+        db=db,
+        workspace_id=chat.workspace_id,
+        memory=memory,
+    )
 
     generate_chat_title(
         db=db,
@@ -327,11 +302,13 @@ def stream_ai_response(
         user_id=current_user.id,
     )
 
-    conversation = build_conversation(
-        db=db,
-        chat_id=message_data.chat_id,
-        context=context,
-    )
+    conversation = build_prompt(
+    db=db,
+    chat_id=message_data.chat_id,
+    workspace_id=chat.workspace_id,
+    user_query=message_data.content,
+    rag_context=context,
+)
 
     full_response = ""
 
@@ -348,11 +325,18 @@ def stream_ai_response(
         for source in sources:
             full_response += f"- {source}\n"
 
-    save_assistant_message(
+    assistant_message = save_assistant_message(
+    db=db,
+    chat_id=message_data.chat_id,
+    content=full_response,
+)
+
+    create_or_update_summary(
         db=db,
         chat_id=message_data.chat_id,
-        content=full_response,
     )
+
+    return assistant_message
 
 def stream_ai_response_after_edit(
     db: Session,
@@ -384,7 +368,7 @@ def stream_ai_response_after_edit(
             detail="User message not found",
         )
 
-    get_owned_chat(
+    chat=get_owned_chat(
         db=db,
         chat_id=message.chat_id,
         current_user=current_user,
@@ -395,11 +379,13 @@ def stream_ai_response_after_edit(
         user_id=current_user.id,
     )
 
-    conversation = build_conversation(
-        db=db,
-        chat_id=message.chat_id,
-        context=context,
-    )
+    conversation = build_prompt(
+    db=db,
+    chat_id=message.chat_id,
+    workspace_id=chat.workspace_id,
+    user_query=message.content,
+    rag_context=context,
+)
 
     full_response = ""
 
@@ -426,8 +412,15 @@ def stream_ai_response_after_edit(
         # only appear after the final DB refresh.
         yield source_text
 
-    save_assistant_message(
+    assistant_message = save_assistant_message(
+    db=db,
+    chat_id=message.chat_id,
+    content=full_response,
+)
+
+    create_or_update_summary(
         db=db,
         chat_id=message.chat_id,
-        content=full_response,
-    )    
+    )
+
+    return assistant_message  

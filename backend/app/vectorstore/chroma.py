@@ -1,9 +1,17 @@
 import chromadb
 
 client = chromadb.PersistentClient(
-    path="chroma_db"
+    path="chroma_db",
 )
 
-collection = client.get_or_create_collection(
-    name="documents"
+documents_collection = (
+    client.get_or_create_collection(
+        name="documents",
+    )
+)
+
+memory_collection = (
+    client.get_or_create_collection(
+        name="workspace_memories",
+    )
 )

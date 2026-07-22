@@ -115,9 +115,11 @@ def delete_document(
     if file_path.exists():
         file_path.unlink()
 
-    from app.vectorstore.chroma import collection
+    from app.vectorstore.chroma import (
+    documents_collection,
+)
 
-    collection.delete(
+    documents_collection.delete(
         where={
             "document_id": document.id,
         }

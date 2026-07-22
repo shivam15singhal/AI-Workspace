@@ -73,3 +73,9 @@ class Chat(Base):
         back_populates="chat",
         cascade="all, delete-orphan",
     )
+    summary = relationship(
+    "ConversationSummary",
+    back_populates="chat",
+    uselist=False,
+    cascade="all, delete-orphan",
+    )

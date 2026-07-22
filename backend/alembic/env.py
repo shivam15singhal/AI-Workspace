@@ -19,9 +19,14 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.database.database import Base
+
 from app.models.user import User
+from app.models.workspace import Workspace
 from app.models.chat import Chat
+from app.models.document import Document
 from app.models.message import Message
+from app.models.workspace_memory import WorkspaceMemory
+from app.models.conversation_summary import ConversationSummary
 
 target_metadata = Base.metadata
 # other values from the config, defined by the needs of env.py,
