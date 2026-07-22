@@ -67,12 +67,12 @@ def build_prompt(
             }
         )
         
-        summary = get_summary(
-        db=db,
-        chat_id=chat_id,
-        )
+    summary = get_summary(
+    db=db,
+    chat_id=chat_id,
+    )
 
-        if (
+    if (
             summary
             and summary.summary.strip()
         ):
@@ -114,7 +114,7 @@ def build_prompt(
             Message.chat_id == chat_id
         )
         .order_by(
-            Message.created_at.asc()
+            Message.created_at.desc()
         )
         .limit(20)
         .all()

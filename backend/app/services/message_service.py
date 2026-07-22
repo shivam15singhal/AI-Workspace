@@ -23,7 +23,9 @@ from app.services.workspace_memory_service import (
 from app.services.summary_service import (
     create_or_update_summary,
 )
+from app.agents.agent import Agent
 llm_service = LLMService()
+agent = Agent()
 
 
 def save_user_message(
@@ -202,9 +204,8 @@ def create_message(
     rag_context=context,
 )
 
-    ai_response = llm_service.generate(
+    ai_response = agent.run(
     conversation,
-    message_data.model,
 )
 
     if sources:
@@ -312,9 +313,8 @@ def stream_ai_response(
 
     full_response = ""
 
-    for chunk in llm_service.stream(
+    for chunk in agent.stream(
     conversation,
-    message_data.model,
 ):
         full_response += chunk
         yield chunk
@@ -389,7 +389,7 @@ def stream_ai_response_after_edit(
 
     full_response = ""
 
-    for chunk in llm_service.stream(
+    for chunk in agent.stream(
     conversation,
 ):
         full_response += chunk
