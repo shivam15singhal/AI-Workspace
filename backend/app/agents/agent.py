@@ -36,11 +36,10 @@ class Agent:
         )
 
         tool = plan.get("tool")
-        
 
         if tool is None:
             return conversation
-        
+
         if tool not in TOOLS:
             return conversation
 
@@ -70,9 +69,7 @@ class Agent:
         conversation = self._prepare_conversation(
             conversation,
         )
-        import json
 
-        
         return self.llm.generate(
             conversation,
         )
@@ -84,9 +81,7 @@ class Agent:
         conversation = self._prepare_conversation(
             conversation,
         )
-        import json
 
-        
         return self.llm.stream(
             conversation,
         )

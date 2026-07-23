@@ -5,11 +5,13 @@ from app.tools.calculator import (
 from app.tools.datetime_tool import (
     DateTimeTool,
 )
+from app.tools.web_search_tool import WebSearchTool
 
 TOOLS = {
     "calculator": CalculatorTool(),
 
     "datetime": DateTimeTool(),
+    "web_search": WebSearchTool(),
 }
 def get_tool_descriptions():
     """

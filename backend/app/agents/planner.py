@@ -19,19 +19,19 @@ class Planner:
         user_message: str,
     ):
         response = llm.generate(
-    [
-        {
-            "role": "system",
-            "content": PLANNER_TEMPLATE.format(
-                tools=get_tool_descriptions(),
-            ),
-        },
-        {
-            "role": "user",
-            "content": user_message,
-        },
-    ]
-)
+            [
+                {
+                    "role": "system",
+                    "content": PLANNER_TEMPLATE.format(
+                        tools=get_tool_descriptions(),
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": user_message,
+                },
+            ]
+        )
 
         response = (
             response.replace(
@@ -45,12 +45,18 @@ class Planner:
             .strip()
         )
 
+        
         try:
-            return json.loads(
+            plan = json.loads(
                 response,
             )
 
-        except Exception:
+        
+            return plan
+
+        except Exception as e:
+
+        
             return {
                 "tool": None,
             }

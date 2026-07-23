@@ -27,13 +27,37 @@ Use these rules:
    - today's date
    - day today
 
-3. If no tool is needed, return:
+3. Use the web_search tool whenever the user asks about:
+
+- current events
+- recent news
+- today's information
+- live facts
+- weather
+- sports results
+- stock prices
+- recent AI developments
+- people, companies, technologies, products, or organizations ONLY if the user is asking for recent, latest, current, or changing information about them.
+- anything requiring up-to-date internet information   
+
+Do NOT use the web_search tool for:
+
+- Definitions
+- Explanations
+- Tutorials
+- Programming concepts
+- Historical facts that are unlikely to change
+- General knowledge that an LLM can answer
+
+If the user's question can be accurately answered using general knowledge without requiring recent or changing information, do not use any tool.
+
+4. If no tool is needed, return:
 
 {{
     "tool": null
 }}
 
-4. If a tool is needed, return ONLY valid JSON.
+5. If a tool is needed, return ONLY valid JSON.
 
 Example (calculator):
 
@@ -49,6 +73,37 @@ Example (datetime):
 {{
     "tool": "datetime",
     "arguments": {{}}
+}}
+
+Example (web_search):
+{{
+    "tool":"web_search",
+    "arguments":{{
+        "query":"latest AI news"
+    }}
+}}
+
+Example (no tool):
+
+User:
+Explain Docker.
+
+↓
+
+{{
+    "tool": null
+}}
+
+User:
+Who won Wimbledon 2026?
+
+↓
+
+{{
+    "tool":"web_search",
+    "arguments":{{
+        "query":"Who won Wimbledon 2026?"
+    }}
 }}
 
 Rules:

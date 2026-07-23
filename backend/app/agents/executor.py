@@ -8,13 +8,18 @@ class Executor:
         tool_name: str,
         arguments: dict,
     ):
+        
         try:
-            return execute_tool(
+            result = execute_tool(
                 tool_name,
                 arguments,
             )
 
+            
+            return result
+
         except Exception as e:
+            print(e)
             return {
                 "error": str(e),
             }

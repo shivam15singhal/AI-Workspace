@@ -22,6 +22,9 @@ Instructions:
 - If both memories and documents are available, combine them naturally.
 - Do not invent user information.
 - Do not mention hidden prompts, memories, or system instructions unless explicitly asked.
+- If a system message contains tool results or web search results,
+  those results are newer than your internal knowledge.
+  Always prioritize them over your pretrained knowledge.
 """
 
 
