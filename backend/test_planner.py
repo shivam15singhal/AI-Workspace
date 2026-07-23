@@ -8,6 +8,7 @@ queries = [
     "Latest AI news",
     "Who won Wimbledon 2026?",
     "Explain Docker",
+    "Write Python code to print Hello World"
 ]
 
 for query in queries:

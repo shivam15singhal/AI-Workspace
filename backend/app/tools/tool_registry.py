@@ -7,11 +7,16 @@ from app.tools.datetime_tool import (
 )
 from app.tools.web_search_tool import WebSearchTool
 
+from app.tools.python_interpreter import (
+    PythonInterpreterTool,
+)
+
 TOOLS = {
     "calculator": CalculatorTool(),
 
     "datetime": DateTimeTool(),
     "web_search": WebSearchTool(),
+    "python": PythonInterpreterTool(),
 }
 def get_tool_descriptions():
     """

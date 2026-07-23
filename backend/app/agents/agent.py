@@ -3,7 +3,7 @@ from app.agents.executor import Executor
 from app.agents.messages import build_tool_message
 from app.tools.tool_registry import TOOLS
 from app.llm.service import LLMService
-
+from app.agents.python_agent import PythonAgent
 
 class Agent:
 
@@ -11,6 +11,7 @@ class Agent:
         self.planner = Planner()
         self.executor = Executor()
         self.llm = LLMService()
+        self.python_agent = PythonAgent()
 
     def _prepare_conversation(
         self,
@@ -44,11 +45,34 @@ class Agent:
             return conversation
 
         arguments = plan.get(
-            "arguments",
-            {},
+                "arguments",
+                {},
+            )
+
+# -----------------------------
+# Python Agent
+# -----------------------------
+
+        if tool == "python":
+
+            generated_code = self.python_agent.generate_code(
+            latest_user_message,
+            )
+
+            print("\n========== GENERATED PYTHON ==========")
+            print(generated_code)
+            print("======================================\n")
+
+            result = self.executor.execute(
+            "python",
+            {
+                "code": generated_code,
+            },
         )
 
-        result = self.executor.execute(
+        else:
+
+            result = self.executor.execute(
             tool,
             arguments,
         )

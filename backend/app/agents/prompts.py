@@ -51,13 +51,31 @@ Do NOT use the web_search tool for:
 
 If the user's question can be accurately answered using general knowledge without requiring recent or changing information, do not use any tool.
 
-4. If no tool is needed, return:
+
+4. Use the python tool whenever the user asks to:
+
+
+- execute Python code
+- run Python code
+- solve a problem using Python
+- debug Python code
+- explain Python code by executing it
+- calculate something using Python
+
+Do NOT use the python tool for:
+
+- General programming explanations
+- Python syntax questions
+- Conceptual questions
+- Coding tutorials
+
+5. If no tool is needed, return:
 
 {{
     "tool": null
 }}
 
-5. If a tool is needed, return ONLY valid JSON.
+6. If a tool is needed, return ONLY valid JSON.
 
 Example (calculator):
 
@@ -73,6 +91,12 @@ Example (datetime):
 {{
     "tool": "datetime",
     "arguments": {{}}
+}}
+
+Example (python):
+
+{{
+    "tool": "python",
 }}
 
 Example (web_search):
