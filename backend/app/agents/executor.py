@@ -7,12 +7,14 @@ class Executor:
         self,
         tool_name: str,
         arguments: dict,
+        context=None,
     ):
         
         try:
             result = execute_tool(
                 tool_name,
                 arguments,
+                context,
             )
 
             
