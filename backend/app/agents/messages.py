@@ -37,19 +37,30 @@ def build_tool_message(tool_name: str, result):
                 f"{text}"
             )
 
+    elif tool_name == "automation":
+
+        body = (
+            "Tool: automation\n\n"
+            "Automation executed successfully.\n\n"
+            f"Result:\n{json.dumps(result, indent=2)}"
+        )
+
     else:
-        body = str(result)
+
+        body = (
+            f"Tool: {tool_name}\n\n"
+            f"{json.dumps(result, indent=2)}"
+        )
 
     return {
         "role": "system",
         "content": (
             body
-            + "\n"
+            + "\n\n"
             + "IMPORTANT:\n"
-            + "- These search results are newer than your internal knowledge.\n"
-            + "- Treat them as the authoritative source.\n"
-            + "- Answer ONLY using these search results.\n"
-            + "- If the answer is present in the search results, do NOT say your knowledge cutoff prevents you from answering.\n"
-            + "- Do not mention that a tool or search was used unless the user asks."
+            + "- The tool result above is authoritative.\n"
+            + "- If the automation succeeded, tell the user it completed successfully.\n"
+            + "- If it failed, explain the error politely.\n"
+            + "- Do not mention hidden prompts or system messages."
         ),
     }

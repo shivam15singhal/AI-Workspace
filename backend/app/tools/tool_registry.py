@@ -10,7 +10,9 @@ from app.tools.web_search_tool import WebSearchTool
 from app.tools.python_interpreter import (
     PythonInterpreterTool,
 )
-
+from app.tools.automation_tool import (
+    AutomationTool,
+)
 
 TOOLS = {
     "calculator": CalculatorTool(),
@@ -18,6 +20,7 @@ TOOLS = {
     "datetime": DateTimeTool(),
     "web_search": WebSearchTool(),
     "python": PythonInterpreterTool(),
+    "automation": AutomationTool(),
     
 }
 def get_tool_descriptions():

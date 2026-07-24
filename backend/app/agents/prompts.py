@@ -69,13 +69,41 @@ Do NOT use the python tool for:
 - Conceptual questions
 - Coding tutorials
 
-5. If no tool is needed, return:
+5. Use the automation tool whenever the user asks to perform an external action such as:
+
+- send an email
+- email someone
+- send a Gmail message
+- automate a task
+- trigger a workflow
+
+For sending emails, extract:
+
+- recipient email
+- subject (generate one if the user doesn't provide it)
+- email body
+
+Return:
+
+{{
+  "tool": "automation",
+  "arguments": {{
+    "workflow": "send-email",
+    "payload": {{
+      "to": "...",
+      "subject": "...",
+      "body": "..."
+    }}
+  }}
+}}
+
+6. If no tool is needed, return:
 
 {{
     "tool": null
 }}
 
-6. If a tool is needed, return ONLY valid JSON.
+7. If a tool is needed, return ONLY valid JSON.
 
 Example (calculator):
 
@@ -107,6 +135,16 @@ Example (web_search):
     }}
 }}
 
+{{
+    "tool": "automation",
+    "arguments": {{
+        "workflow": "ai-workspace",
+        "payload": {{
+            "message": "Hello from AI Workspace"
+        }}
+    }}
+}}
+
 
 Example (no tool):
 
@@ -129,6 +167,72 @@ Who won Wimbledon 2026?
     "arguments":{{
         "query":"Who won Wimbledon 2026?"
     }}
+}}
+
+User:
+Run my AI Workspace automation.
+
+↓
+
+{{
+    "tool": "automation",
+    "arguments": {{
+        "workflow": "ai-workspace",
+        "payload": {{
+            "message": "Hello from AI Workspace"
+        }}
+    }}
+}}
+
+User:
+Send an email to hr@example.com saying Thank you for the interview.
+
+↓
+
+{{
+  "tool":"automation",
+  "arguments":{{
+    "workflow":"send-email",
+    "payload":{{
+      "to":"hr@example.com",
+      "subject":"Thank You",
+      "body":"Thank you for the interview."
+    }}
+  }}
+}}
+
+User:
+Email john@gmail.com that the meeting is at 5 PM.
+
+↓
+
+{{
+  "tool":"automation",
+  "arguments":{{
+    "workflow":"send-email",
+    "payload":{{
+      "to":"john@gmail.com",
+      "subject":"Meeting Update",
+      "body":"The meeting is at 5 PM."
+    }}
+  }}
+}}
+
+User:
+Send mail to abc@gmail.com.
+
+↓
+
+{{
+  "tool":"automation",
+  "arguments":{{
+    "workflow":"send-email",
+    "payload":{{
+      "to":"abc@gmail.com",
+      "subject":"AI Workspace",
+      "body":""
+    }}
+  }}
 }}
 
 Rules:

@@ -3,15 +3,14 @@ from app.agents.planner import Planner
 planner = Planner()
 
 queries = [
-    "What is 45 * 98?",
-    "What time is it?",
-    "Latest AI news",
-    "Who won Wimbledon 2026?",
-    "Explain Docker",
-    "Write Python code to print Hello World"
+    "Send an email to shivambackup252@gmail.com saying Hello from AI Workspace",
+    "Email hr@example.com thanking them for the interview",
+    "Send mail to abc@gmail.com",
 ]
 
 for query in queries:
     print("=" * 60)
     print(query)
-    print(planner.plan(query))
+    print(
+        planner.plan(query)
+    )
