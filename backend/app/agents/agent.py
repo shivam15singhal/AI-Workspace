@@ -1,3 +1,5 @@
+import json
+
 from app.agents.planner import Planner
 from app.agents.executor import Executor
 from app.agents.messages import build_tool_message
@@ -40,9 +42,8 @@ class Agent:
         plan = self.planner.plan(
             latest_user_message,
         )
-        print("\n========== PLAN ==========")
-        print(plan)
-        print("==========================\n")
+
+        
 
         tool = plan.get("tool")
 
@@ -67,10 +68,7 @@ class Agent:
                 latest_user_message,
             )
 
-            print("\n========== GENERATED PYTHON ==========")
-            print(generated_code)
-            print("======================================\n")
-
+            
             result = self.executor.execute(
                 "python",
                 {
@@ -78,9 +76,6 @@ class Agent:
                 },
                 context=context,
             )
-            print("\n========== TOOL RESULT ==========")
-            print(result)
-            print("=================================\n")
 
         else:
 
@@ -90,19 +85,17 @@ class Agent:
                 context=context,
             )
 
+
         tool_message = build_tool_message(
             tool,
             result,
         )
 
+       
+
         return conversation + [
             tool_message,
         ]
-        import json
-
-        print("\n================ TOOL MESSAGE ================")
-        print(json.dumps(tool_message, indent=2))
-        print("=============================================\n")
 
     def run(
         self,
@@ -113,12 +106,11 @@ class Agent:
             conversation,
             context=context,
         )
-        print("\n========== FINAL CONVERSATION ==========")
-        for msg in conversation:
-            print("--------------------------------")
-            print(msg["role"])
-            print(msg["content"])
-            print("========================================\n")
+
+        
+
+        
+
 
         return self.llm.generate(
             conversation,

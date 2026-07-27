@@ -65,18 +65,12 @@ def exchange_code_for_tokens(code: str, code_verifier: str):
         },
     )
 
-    print("\n================ TOKEN RESPONSE ================")
-    print("STATUS:", response.status_code)
-    print(response.text)
-    print("===============================================\n")
+   
 
     response.raise_for_status()
 
     token_data = response.json()
 
-    print("\n================ TOKEN DATA ====================")
-    print(token_data)
-    print("===============================================\n")
 
     credentials = Credentials(
         token=token_data["access_token"],
@@ -96,10 +90,7 @@ def exchange_code_for_tokens(code: str, code_verifier: str):
 
 
 def get_google_user_info(credentials):
-    print("\n================ USER INFO DEBUG ===============")
-    print("TOKEN USED:")
-    print(credentials.token)
-    print("===============================================\n")
+  
 
     response = requests.get(
         "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -108,10 +99,7 @@ def get_google_user_info(credentials):
         },
     )
 
-    print("\n================ USER INFO RESPONSE ============")
-    print("STATUS:", response.status_code)
-    print(response.text)
-    print("===============================================\n")
+    
 
     response.raise_for_status()
 
@@ -371,7 +359,7 @@ def update_calendar_event(
         .execute()
         .get("items", [])
     )
-    print("\n========== EVENTS ==========")
+  
 
     for event in events:
         print(
@@ -380,7 +368,7 @@ def update_calendar_event(
         event["start"].get("dateTime", event["start"].get("date")),
     )
 
-    print("============================\n")
+    
 
     target_event = None
 

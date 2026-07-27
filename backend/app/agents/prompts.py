@@ -170,13 +170,46 @@ Return:
   }
 }
 
-10. If no tool is needed, return:
+
+10. Use meeting_scheduler when the user wants BOTH:
+
+- create a meeting/event
+AND
+- send invitation emails
+- notify attendees
+- schedule a meeting and email someone
+- create a calendar event and send invitations
+
+Datetime Rules:
+
+- Always generate valid ISO8601 datetime strings.
+- Never generate 24:00:00.
+- Midnight must be represented as 00:00:00 on the NEXT calendar day.
+- The end time must always be later than the start time.
+- If a meeting crosses midnight, increment the date for the end time.
+
+Return:
 
 {
-    "tool": null
+  "tool": "meeting_scheduler",
+  "arguments": {
+    "summary": "...",
+    "description": "",
+    "start": "ISO8601 datetime",
+    "end": "ISO8601 datetime",
+    "attendees": [
+      "person@example.com"
+    ]
+  }
 }
 
-11. If a tool is needed, return ONLY valid JSON.
+11. If no tool is needed, return:
+
+{
+  "tool": null
+}
+
+12. If a tool is needed, return ONLY valid JSON.
 
 Example (calculator):
 
@@ -259,6 +292,20 @@ Move Team Meeting to tomorrow at 5 PM.
   }
 }
 
+User:
+Schedule a meeting tomorrow from 11 PM to midnight.
+
+↓
+
+{
+  "tool": "calendar.create",
+  "arguments": {
+    "summary": "Meeting",
+    "description": "",
+    "start": "2026-07-29T23:00:00+05:30",
+    "end": "2026-07-30T00:00:00+05:30"
+  }
+}
 
 Example (no tool):
 
@@ -346,6 +393,44 @@ Send mail to abc@gmail.com.
       "subject":"AI Workspace",
       "body":""
     }
+  }
+}
+
+User:
+Schedule an interview tomorrow at 8 PM with Rahul (rahul@example.com) and send him an invitation email.
+
+↓
+
+{
+  "tool": "meeting_scheduler",
+  "arguments": {
+    "summary": "Interview with Rahul",
+    "description": "",
+    "start": "2026-07-28T20:00:00+05:30",
+    "end": "2026-07-28T21:00:00+05:30",
+    "attendees": [
+      "rahul@example.com"
+    ]
+  }
+}
+
+
+User:
+Create a project meeting tomorrow at 3 PM with alice@gmail.com and bob@gmail.com and send invitations.
+
+↓
+
+{
+  "tool": "meeting_scheduler",
+  "arguments": {
+    "summary": "Project Meeting",
+    "description": "",
+    "start": "2026-07-28T15:00:00+05:30",
+    "end": "2026-07-28T16:00:00+05:30",
+    "attendees": [
+      "alice@gmail.com",
+      "bob@gmail.com"
+    ]
   }
 }
 

@@ -179,9 +179,7 @@ def google_callback(
         code_verifier,
     )
 
-    print("\n================ ACCESS TOKEN =================")
-    print(credentials.token)
-    print("===============================================\n")
+    
 
     response = requests.get(
         "https://www.googleapis.com/calendar/v3/users/me/calendarList",
@@ -190,19 +188,14 @@ def google_callback(
         },
     )
 
-    print("\n================ CALENDAR API =================")
-    print("STATUS:", response.status_code)
-    print(response.text)
-    print("===============================================\n")
+    
 
     response.raise_for_status()
 
     # If Calendar API works, then test user info
     google_user = get_google_user_info(credentials)
 
-    print("\n================ GOOGLE USER ==================")
-    print(google_user)
-    print("===============================================\n")
+    
 
     save_google_account(
         db=db,

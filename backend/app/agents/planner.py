@@ -37,24 +37,17 @@ class Planner:
             .strip()
         )
 
-        print("\n========== PLANNER RAW RESPONSE ==========")
-        print(response)
-        print("==========================================\n")
+        
 
         try:
             plan = json.loads(response)
 
-            print("\n========== PARSED PLAN ==========")
-            print(plan)
-            print("=================================\n")
+           
 
             return plan
 
         except Exception as e:
-            print("\n========== PLANNER ERROR ==========")
-            print(e)
-            print(response)
-            print("===================================\n")
+            
 
             return {
                 "tool": None,

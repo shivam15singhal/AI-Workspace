@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "http://localhost:5678/webhook-test"
+BASE_URL = "http://localhost:5678/webhook"
 
 
 def trigger_workflow(
