@@ -125,41 +125,57 @@ export default function WorkspaceSwitcher() {
       <div className="px-4 pb-4">
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="
-              flex
-              w-full
-              items-center
-              justify-between
-              rounded-lg
-              border
-              px-3
-              py-2
-              text-sm
-              hover:bg-accent
-            "
-          >
-            <div className="flex items-center gap-2">
-              <Folder
-                className="h-4 w-4"
-                style={{
-                  color:
-                    selectedWorkspace?.color,
-                }}
-              />
+  className="
+    flex
+    w-full
+    items-center
+    justify-between
+    rounded-xl
+    border
+    border-border/60
+    bg-card
+    px-4
+    py-3
+    text-sm
+    transition-all
+    duration-200
+    hover:bg-accent/50
+    hover:shadow-sm
+  "
+>
+  <div className="flex items-center gap-3 min-w-0">
+    <div
+      className="flex h-9 w-9 items-center justify-center rounded-lg"
+      style={{
+        backgroundColor: `${selectedWorkspace?.color ?? "#6366F1"}20`,
+      }}
+    >
+      <Folder
+        className="h-4 w-4"
+        style={{
+          color: selectedWorkspace?.color,
+        }}
+      />
+    </div>
 
-              <span className="truncate">
-                {selectedWorkspace?.name ??
-                  "Select Workspace"}
-              </span>
-            </div>
+    <div className="min-w-0 text-left">
+      <p className="truncate font-medium">
+        {selectedWorkspace?.name ?? "Choose Workspace"}
+      </p>
 
-            <ChevronDown className="h-4 w-4" />
-          </DropdownMenuTrigger>
+      <p className="text-xs text-muted-foreground">
+        Workspace
+      </p>
+    </div>
+  </div>
+
+  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+</DropdownMenuTrigger>
 
           <DropdownMenuContent
-            align="start"
-            className="w-72"
-          >
+  align="start"
+  className="w-80 rounded-xl border-border/60 p-2 shadow-xl"
+>
             {workspaces.map((workspace) => (
               <WorkspaceItem
                 key={workspace.id}
@@ -192,27 +208,29 @@ export default function WorkspaceSwitcher() {
             <DropdownMenuSeparator />
 
             <div
-              className="
-                flex
-                cursor-pointer
-                items-center
-                gap-2
-                rounded-md
-                px-2
-                py-2
-                text-sm
-                hover:bg-accent
-              "
-              onClick={() => {
-                setEditingWorkspace(
-                  null,
-                );
-                setDialogOpen(true);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              New Workspace
-            </div>
+  className="
+    mt-2
+    flex
+    cursor-pointer
+    items-center
+    gap-3
+    rounded-lg
+    px-3
+    py-2.5
+    text-sm
+    font-medium
+    transition-colors
+    hover:bg-accent
+  "
+  onClick={() => {
+    setEditingWorkspace(null);
+    setDialogOpen(true);
+  }}
+>
+  <Plus className="h-4 w-4" />
+  Create Workspace
+</div>
+
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

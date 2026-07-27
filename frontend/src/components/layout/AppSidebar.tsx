@@ -32,18 +32,32 @@ export default function AppSidebar() {
   );
 
   return (
-    <aside className="flex h-screen w-72 flex-col border-r bg-background">
+    <aside className="flex h-screen w-80 shrink-0 flex-col border-r border-border/60 bg-card/70 backdrop-blur-xl">  
       <SidebarHeader />
       <WorkspaceSwitcher />
 
       <div className="p-4">
         <Button
-          className="w-full justify-start"
-          onClick={createNewChat}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Chat
-        </Button>
+  size="lg"
+  onClick={createNewChat}
+  className="
+    h-11
+    w-full
+    justify-start
+    rounded-xl
+    bg-primary
+    font-medium
+    shadow-sm
+    transition-all
+    duration-200
+    hover:scale-[1.01]
+    hover:shadow-md
+    active:scale-[0.99]
+  "
+>
+  <Plus className="mr-2 h-4 w-4" />
+  New Chat
+</Button>
       </div>
 
       <SidebarSearch

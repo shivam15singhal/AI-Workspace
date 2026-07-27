@@ -16,7 +16,8 @@ export default function ChatList({
   onSelect,
 }: Props) {
   return (
-    <div className="flex-1 space-y-1 overflow-y-auto px-3">
+    <div className="flex-1 overflow-y-auto px-4 pb-4">
+  <div className="space-y-2">
       {chats.length === 0 ? (
         <p className="px-2 text-sm text-muted-foreground">
           {search
@@ -35,6 +36,7 @@ export default function ChatList({
           />
         ))
       )}
+      </div>
     </div>
   );
 }
