@@ -1,14 +1,23 @@
+from app.core.config import settings
+from app.llm.gemini import GeminiLLM
 from app.llm.models import LLMModel
 from app.llm.ollama import OllamaLLM
 
 
 class LLMService:
     def __init__(self):
-        self.llm = OllamaLLM()
+        provider = settings.LLM_PROVIDER.lower()
 
-        self.default_model = (
-            LLMModel.LLAMA.value
-        )
+        if provider == "gemini":
+            self.llm = GeminiLLM()
+            self.default_model = settings.GEMINI_MODEL
+        else:
+            self.llm = OllamaLLM()
+            self.default_model = (
+                settings.OLLAMA_MODEL
+                if hasattr(settings, "OLLAMA_MODEL")
+                else LLMModel.LLAMA.value
+            )
 
     def generate(
         self,

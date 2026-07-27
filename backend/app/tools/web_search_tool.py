@@ -13,7 +13,10 @@ class WebSearchTool:
         self,
         query: str,
         max_results: int = 5,
+        context=None,
+        **kwargs,
     ):
+        max_results = max(1, min(max_results, 10))
         try:
             with DDGS() as ddgs:
                 results = list(
@@ -34,6 +37,7 @@ class WebSearchTool:
                         "title": item.get("title"),
                         "url": item.get("href"),
                         "snippet": item.get("body"),
+                        "source": "DuckDuckGo",
                     }
                     for item in results
                 ]

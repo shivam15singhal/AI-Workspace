@@ -14,6 +14,8 @@ from app.api.workspace_memory import (
     router as workspace_memory_router,
 )
 from app.api.document import router as document_router
+from app.api import google_calendar
+
 
 app = FastAPI(
     title="AI Workspace API",
@@ -39,7 +41,7 @@ app.include_router(
 app.include_router(
     workspace_memory_router,
 )
-
+app.include_router(google_calendar.router)
 
 @app.get("/")
 def home():

@@ -1,13 +1,8 @@
 import json
 
 from app.llm.service import LLMService
-
-from app.agents.prompts import (
-    PLANNER_TEMPLATE,
-)
-from app.tools.tool_registry import (
-    get_tool_descriptions,
-)
+from app.agents.prompts import PLANNER_TEMPLATE
+from app.tools.tool_registry import get_tool_descriptions
 
 llm = LLMService()
 
@@ -18,13 +13,16 @@ class Planner:
         self,
         user_message: str,
     ):
+        prompt = PLANNER_TEMPLATE.replace(
+            "{tools}",
+            get_tool_descriptions(),
+        )
+
         response = llm.generate(
             [
                 {
                     "role": "system",
-                    "content": PLANNER_TEMPLATE.format(
-                        tools=get_tool_descriptions(),
-                    ),
+                    "content": prompt,
                 },
                 {
                     "role": "user",
@@ -34,29 +32,30 @@ class Planner:
         )
 
         response = (
-            response.replace(
-                "```json",
-                "",
-            )
-            .replace(
-                "```",
-                "",
-            )
+            response.replace("```json", "")
+            .replace("```", "")
             .strip()
         )
 
-        
-        try:
-            plan = json.loads(
-                response,
-            )
+        print("\n========== PLANNER RAW RESPONSE ==========")
+        print(response)
+        print("==========================================\n")
 
-        
+        try:
+            plan = json.loads(response)
+
+            print("\n========== PARSED PLAN ==========")
+            print(plan)
+            print("=================================\n")
+
             return plan
 
         except Exception as e:
+            print("\n========== PLANNER ERROR ==========")
+            print(e)
+            print(response)
+            print("===================================\n")
 
-        
             return {
                 "tool": None,
             }

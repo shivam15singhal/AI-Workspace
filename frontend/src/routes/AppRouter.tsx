@@ -8,6 +8,7 @@ import Documents from "@/pages/documents/Documents";
 import Workspaces from "@/pages/workspace/Workspaces";
 import ProtectedRoute from "./ProtectedRoute";
 
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -48,6 +49,7 @@ export default function AppRouter() {
   path="/workspaces"
   element={<Workspaces />}
 />
+
 
       </Routes>
     </BrowserRouter>

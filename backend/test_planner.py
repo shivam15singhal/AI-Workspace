@@ -1,16 +1,7 @@
-from app.agents.planner import Planner
+from google import genai
+from app.core.config import settings
 
-planner = Planner()
+client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-queries = [
-    "Send an email to shivambackup252@gmail.com saying Hello from AI Workspace",
-    "Email hr@example.com thanking them for the interview",
-    "Send mail to abc@gmail.com",
-]
-
-for query in queries:
-    print("=" * 60)
-    print(query)
-    print(
-        planner.plan(query)
-    )
+for model in client.models.list():
+    print(model.name)

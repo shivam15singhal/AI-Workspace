@@ -6,43 +6,10 @@ from app.database.database import SessionLocal
 from app.models.document import Document
 
 from app.llm.service import LLMService
-from app.vectorstore.chroma import (
-    documents_collection,
-)
-
-from pypdf import PdfReader
-from docx import Document as DocxDocument
+from app.services.file_parser import FileParser
+from app.vectorstore.chroma import documents_collection
 
 llm_service = LLMService()
-
-
-def extract_pdf_text(file_path: Path) -> str:
-    reader = PdfReader(file_path)
-
-    text = ""
-
-    for page in reader.pages:
-        page_text = page.extract_text()
-
-        if page_text:
-            text += page_text + "\n"
-
-    return text
-
-
-def extract_docx_text(file_path: Path) -> str:
-    document = DocxDocument(file_path)
-
-    return "\n".join(
-        paragraph.text
-        for paragraph in document.paragraphs
-    )
-
-
-def extract_txt_text(file_path: Path) -> str:
-    return file_path.read_text(
-        encoding="utf-8",
-    )
 
 
 def chunk_text(
@@ -68,6 +35,7 @@ def process_document(
     document_id: int,
 ):
     db: Session = SessionLocal()
+    document = None
 
     try:
         document = (
@@ -84,17 +52,8 @@ def process_document(
 
         file_path = Path(document.filepath)
 
-        if document.content_type == "application/pdf":
-            text = extract_pdf_text(file_path)
-
-        elif (
-            document.content_type
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ):
-            text = extract_docx_text(file_path)
-
-        else:
-            text = extract_txt_text(file_path)
+        # Extract text using the unified FileParser
+        text = FileParser.extract_text(file_path)
 
         chunks = chunk_text(text)
 
@@ -102,15 +61,14 @@ def process_document(
             embedding = llm_service.embedding(chunk)
 
             documents_collection.add(
-                ids=[
-                    f"{document.id}_{index}"
-                ],
+                ids=[f"{document.id}_{index}"],
                 embeddings=[embedding],
                 documents=[chunk],
                 metadatas=[
                     {
                         "document_id": document.id,
                         "user_id": document.user_id,
+                        "workspace_id": document.workspace_id,
                         "chunk_index": index,
                     }
                 ],

@@ -85,65 +85,179 @@ For sending emails, extract:
 
 Return:
 
-{{
+{
   "tool": "automation",
-  "arguments": {{
+  "arguments": {
     "workflow": "send-email",
-    "payload": {{
+    "payload": {
       "to": "...",
       "subject": "...",
       "body": "..."
-    }}
-  }}
-}}
+    }
+  }
+}
 
-6. If no tool is needed, return:
+6. Use calendar.create when the user wants to:
 
-{{
+- create a meeting
+- schedule a meeting
+- schedule an interview
+- create an event
+- add an event to calendar
+- book a meeting
+- remind me on my calendar
+
+Return:
+
+{
+  "tool": "calendar.create",
+  "arguments": {
+    "summary": "...",
+    "description": "",
+    "start": "ISO8601 datetime",
+    "end": "ISO8601 datetime"
+  }
+}
+
+7. Use calendar.list when the user asks:
+
+- what are my meetings
+- show my schedule
+- today's events
+- upcoming events
+- list calendar events
+
+Return:
+
+{
+  "tool": "calendar.list",
+  "arguments": {}
+}
+
+8. Use calendar.delete when the user asks:
+
+- cancel meeting
+- delete event
+- remove appointment
+- delete meeting
+- remove meeting
+
+Return:
+
+{
+  "tool": "calendar.delete",
+  "arguments": {
+    "summary": "Event title"
+  }
+}
+
+9. Use calendar.update when the user asks:
+
+- reschedule meeting
+- change meeting time
+- rename event
+- update calendar event
+
+Return:
+
+{
+  "tool": "calendar.update",
+  "arguments": {
+    "summary": "Event title",
+    "description": "",
+    "start": "ISO8601 datetime",
+    "end": "ISO8601 datetime"
+  }
+}
+
+10. If no tool is needed, return:
+
+{
     "tool": null
-}}
+}
 
-7. If a tool is needed, return ONLY valid JSON.
+11. If a tool is needed, return ONLY valid JSON.
 
 Example (calculator):
 
-{{
+{
     "tool": "calculator",
-    "arguments": {{
+    "arguments": {
         "expression": "25 * 7"
-    }}
-}}
+    }
+}
 
 Example (datetime):
 
-{{
+{
     "tool": "datetime",
-    "arguments": {{}}
-}}
+    "arguments": {}
+}
 
 Example (python):
 
-{{
+{
     "tool": "python",
-}}
+}
 
 Example (web_search):
-{{
+{
     "tool":"web_search",
-    "arguments":{{
+    "arguments":{
         "query":"latest AI news"
-    }}
-}}
+    }
+}
 
-{{
+{
     "tool": "automation",
-    "arguments": {{
+    "arguments": {
         "workflow": "ai-workspace",
-        "payload": {{
+        "payload": {
             "message": "Hello from AI Workspace"
-        }}
-    }}
-}}
+        }
+    }
+}
+
+{
+  "tool": "calendar.create",
+  "arguments": {
+    "summary": "AI Interview",
+    "description": "",
+    "start": "2026-07-28T14:00:00+05:30",
+    "end": "2026-07-28T15:00:00+05:30"
+  }
+}
+{
+  "tool": "calendar.list",
+  "arguments": {}
+}
+
+User:
+Delete Team Meeting
+
+↓
+
+{
+  "tool": "calendar.delete",
+  "arguments": {
+    "summary": "Team Meeting"
+  }
+}
+
+User:
+Move Team Meeting to tomorrow at 5 PM.
+
+↓
+
+{
+  "tool": "calendar.update",
+  "arguments": {
+    "summary": "Team Meeting",
+    "description": "",
+    "start": "2026-07-29T17:00:00+05:30",
+    "end": "2026-07-29T18:00:00+05:30"
+  }
+}
 
 
 Example (no tool):
@@ -153,87 +267,87 @@ Explain Docker.
 
 ↓
 
-{{
+{
     "tool": null
-}}
+}
 
 User:
 Who won Wimbledon 2026?
 
 ↓
 
-{{
+{
     "tool":"web_search",
-    "arguments":{{
+    "arguments":{
         "query":"Who won Wimbledon 2026?"
-    }}
-}}
+    }
+}
 
 User:
 Run my AI Workspace automation.
 
 ↓
 
-{{
+{
     "tool": "automation",
-    "arguments": {{
+    "arguments": {
         "workflow": "ai-workspace",
-        "payload": {{
+        "payload": {
             "message": "Hello from AI Workspace"
-        }}
-    }}
-}}
+        }
+    }
+}
 
 User:
 Send an email to hr@example.com saying Thank you for the interview.
 
 ↓
 
-{{
+{
   "tool":"automation",
-  "arguments":{{
+  "arguments":{
     "workflow":"send-email",
-    "payload":{{
+    "payload":{
       "to":"hr@example.com",
       "subject":"Thank You",
       "body":"Thank you for the interview."
-    }}
-  }}
-}}
+    }
+  }
+}
 
 User:
 Email john@gmail.com that the meeting is at 5 PM.
 
 ↓
 
-{{
+{
   "tool":"automation",
-  "arguments":{{
+  "arguments":{
     "workflow":"send-email",
-    "payload":{{
+    "payload":{
       "to":"john@gmail.com",
       "subject":"Meeting Update",
       "body":"The meeting is at 5 PM."
-    }}
-  }}
-}}
+    }
+  }
+}
 
 User:
 Send mail to abc@gmail.com.
 
 ↓
 
-{{
+{
   "tool":"automation",
-  "arguments":{{
+  "arguments":{
     "workflow":"send-email",
-    "payload":{{
+    "payload":{
       "to":"abc@gmail.com",
       "subject":"AI Workspace",
       "body":""
-    }}
-  }}
-}}
+    }
+  }
+}
 
 Rules:
 

@@ -12,19 +12,19 @@ export default function SidebarFooter() {
           className="w-full justify-start"
         >
           <FileText className="mr-2 h-4 w-4" />
-
           Documents
         </Button>
       </Link>
 
-      <Button
-        variant="ghost"
-        className="mt-1 w-full justify-start"
-      >
-        <Settings className="mr-2 h-4 w-4" />
-
-        Settings
-      </Button>
+      <Link to="/settings">
+        <Button
+          variant="ghost"
+          className="mt-1 w-full justify-start"
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Settings
+        </Button>
+      </Link>
     </div>
   );
 }

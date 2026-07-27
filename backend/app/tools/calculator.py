@@ -16,10 +16,20 @@ class CalculatorTool(BaseTool):
         expression: str,
         **kwargs,
     ):
-        return eval(
-            expression,
-            {
-                "__builtins__": {},
-                "math": math,
-            },
-        )
+        try:
+            result = eval(
+                expression,
+                {
+                    "__builtins__": {},
+                    "math": math,
+                },
+            )
+
+            return {
+                "result": result
+            }
+
+        except Exception as e:
+            return {
+                "error": str(e)
+            }

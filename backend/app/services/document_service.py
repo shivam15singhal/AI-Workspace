@@ -13,10 +13,25 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 ALLOWED_TYPES = {
+    # PDF
     "application/pdf",
+
+    # Text
     "text/plain",
     "text/markdown",
+
+    # Word
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
+    # CSV
+    "text/csv",
+    "application/csv",
+
+    # Excel (.xlsx)
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+    # Excel (.xls)
+    "application/vnd.ms-excel",
 }
 
 

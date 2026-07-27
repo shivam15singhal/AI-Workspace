@@ -26,7 +26,7 @@ from app.services.summary_service import (
 from app.agents.agent import Agent
 llm_service = LLMService()
 agent = Agent()
-
+from app.tools.tool_context import ToolContext
 
 def save_user_message(
     db: Session,
@@ -194,6 +194,7 @@ def create_message(
     context, sources = retrieve_context(
         query=message_data.content,
         user_id=current_user.id,
+        workspace_id=chat.workspace_id,
     )
 
     conversation = build_prompt(
@@ -204,8 +205,17 @@ def create_message(
     rag_context=context,
 )
 
+    tool_context = ToolContext(
+    db=db,
+    workspace_id=chat.workspace_id,
+    chat_id=message_data.chat_id,
+    user_id=current_user.id,
+    current_user=current_user,
+)
+
     ai_response = agent.run(
     conversation,
+    context=tool_context,
 )
 
     if sources:
@@ -301,6 +311,7 @@ def stream_ai_response(
     context, sources = retrieve_context(
         query=message_data.content,
         user_id=current_user.id,
+        workspace_id=chat.workspace_id,
     )
 
     conversation = build_prompt(
@@ -313,9 +324,18 @@ def stream_ai_response(
 
     full_response = ""
 
+    tool_context = ToolContext(
+    db=db,
+    workspace_id=chat.workspace_id,
+    chat_id=message_data.chat_id,
+    user_id=current_user.id,
+    current_user=current_user,
+)
+
     for chunk in agent.stream(
-    conversation,
-):
+        conversation,
+        context=tool_context,
+    ):
         full_response += chunk
         yield chunk
 
@@ -377,6 +397,7 @@ def stream_ai_response_after_edit(
     context, sources = retrieve_context(
         query=message.content,
         user_id=current_user.id,
+        workspace_id=chat.workspace_id,
     )
 
     conversation = build_prompt(
@@ -389,9 +410,18 @@ def stream_ai_response_after_edit(
 
     full_response = ""
 
+    tool_context = ToolContext(
+    db=db,
+    workspace_id=chat.workspace_id,
+    chat_id=message.chat_id,
+    user_id=current_user.id,
+    current_user=current_user,
+)
+
     for chunk in agent.stream(
-    conversation,
-):
+        conversation,
+        context=tool_context,
+    ):
         full_response += chunk
 
         yield chunk

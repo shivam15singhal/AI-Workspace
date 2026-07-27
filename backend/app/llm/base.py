@@ -27,3 +27,10 @@ class BaseLLM(ABC):
         messages: list[dict],
     ) -> Generator[str, None, None]:
         pass
+
+    @abstractmethod
+    def generate_embedding(
+        self,
+        text: str,
+    ):
+        pass
