@@ -161,11 +161,11 @@ export default function MessageBubble({
           : "justify-start"
       }`}
     >
-      {/* Assistant Avatar */}
+      
 
       {!isUser && (
         <Avatar className="h-9 w-9 shrink-0">
-          <AvatarFallback className="bg-black text-white">
+          <AvatarFallback className="bg-linear-to-br from-indigo-500 to-violet-600 text-white shadow-lg">
             <Bot className="h-5 w-5" />
           </AvatarFallback>
         </Avatar>
@@ -267,8 +267,8 @@ export default function MessageBubble({
             <div
               className={`rounded-2xl px-5 py-3 shadow-sm ${
                 isUser
-                  ? "bg-black text-white"
-                  : "border bg-muted"
+                  ? "bg-primary text-primary-foreground"
+                  : "rounded-2xl border border-border/60 bg-card shadow-sm"
               }`}
             >
               {message.content && (
