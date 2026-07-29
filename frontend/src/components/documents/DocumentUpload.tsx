@@ -19,8 +19,8 @@ export default function DocumentUpload() {
     useState(false);
 
   async function handleUpload(file: File) {
-    await upload(file);
-  }
+  await upload(file, "workspace");
+}
 
   async function onInputChange(
   e: React.ChangeEvent<HTMLInputElement>,

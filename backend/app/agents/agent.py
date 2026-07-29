@@ -57,6 +57,24 @@ class Agent:
             "arguments",
             {},
         )
+        # -----------------------------
+# Validate planner output
+# -----------------------------
+
+        if tool == "calendar.update":
+            required = ["query", "summary", "start", "end"]
+
+            for key in required:
+                if key not in arguments:
+                    raise ValueError(
+                    f"Planner missing '{key}' for calendar.update"
+                )
+
+        if tool == "calendar.delete":
+            if "query" not in arguments:
+                raise ValueError(
+                "Planner missing 'query' for calendar.delete"
+            )
 
         # -----------------------------
         # Python Agent

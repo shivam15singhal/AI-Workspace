@@ -8,8 +8,8 @@ import { useDocumentStore } from "@/store/documentStore";
 
 export default function Documents() {
   const {
-    documents,
-    fetchDocuments,
+    workspaceDocuments,
+    fetchWorkspaceDocuments,
     remove,
   } = useDocumentStore();
 
@@ -17,11 +17,11 @@ export default function Documents() {
   const [sort, setSort] = useState("newest");
 
   useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
+    fetchWorkspaceDocuments();
+  }, [fetchWorkspaceDocuments]);
 
   const filteredDocuments = useMemo(() => {
-    let result = [...documents];
+    let result = [...workspaceDocuments];
 
     // Search
     result = result.filter((document) =>
@@ -61,7 +61,7 @@ export default function Documents() {
     }
 
     return result;
-  }, [documents, search, sort]);
+  }, [workspaceDocuments, search, sort]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-8">
@@ -76,7 +76,7 @@ export default function Documents() {
       </div>
 
       <DocumentDashboard
-        documents={documents}
+        documents={workspaceDocuments}
         search={search}
         onSearchChange={setSearch}
         sort={sort}
@@ -86,7 +86,6 @@ export default function Documents() {
       <div className="rounded-2xl border bg-card p-6 shadow-sm">
         <DocumentUpload />
       </div>
-      
 
       <div className="rounded-2xl border bg-card p-6 shadow-sm">
         <DocumentList

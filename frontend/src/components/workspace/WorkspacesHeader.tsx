@@ -1,3 +1,8 @@
+import {
+  FolderPlus,
+  Sparkles,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -8,25 +13,36 @@ export default function WorkspacesHeader({
   onCreate,
 }: Props) {
   return (
-    <div className="mb-8 flex items-center justify-between">
-
+    <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      {/* Left */}
       <div>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
 
-        <h1 className="text-3xl font-bold">
-          AI Workspaces
-        </h1>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              AI Workspaces
+            </h1>
 
-        <p className="text-muted-foreground">
-          Organize your chats,
-          documents and AI agents.
-        </p>
-
+            <p className="mt-1 text-sm text-muted-foreground">
+              Organize conversations, documents, AI agents, and
+              workflows in dedicated workspaces.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <Button onClick={onCreate}>
+      {/* Right */}
+      <Button
+        onClick={onCreate}
+        size="lg"
+        className="rounded-xl px-6 shadow-sm"
+      >
+        <FolderPlus className="mr-2 h-5 w-5" />
         New Workspace
       </Button>
-
     </div>
   );
 }

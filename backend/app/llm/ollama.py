@@ -21,7 +21,12 @@ class OllamaLLM(BaseLLM):
             messages=messages,
         )
 
-        return response["message"]["content"]
+        content = response["message"]["content"].strip()
+
+        if content.lower().startswith("assistant"):
+            content = content[len("assistant"):].lstrip()
+
+        return content
 
     def generate_title(
         self,
@@ -57,16 +62,30 @@ class OllamaLLM(BaseLLM):
         self,
         model: str,
         messages: list[dict],
-    ) -> Generator[str, None, None]:
-
+    ):
         stream = ollama.chat(
             model=model,
             messages=messages,
             stream=True,
         )
 
+        skipping = True
+
         for chunk in stream:
-            yield chunk["message"]["content"]
+            text = chunk["message"]["content"]
+
+            if skipping:
+                lower = text.strip().lower()
+
+                if lower in ("assistant", "assistant:"):
+                    continue
+
+                if lower == "":
+                    continue
+
+                skipping = False
+
+            yield text
 
     def generate_embedding(
         self,

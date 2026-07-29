@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import api from "../../api/axios";
 
 import GoogleConnectionCard from "@/components/settings/GoogleConnectionCard";
@@ -53,6 +55,7 @@ export default function Settings() {
       }
     } catch (err) {
       console.error(err);
+      toast.error("Failed to check Google Calendar status.");
     }
   };
 
@@ -66,6 +69,7 @@ export default function Settings() {
       setEvents(response.data.events);
     } catch (err) {
       console.error(err);
+      toast.error("Failed to load calendar events.");
     } finally {
       setLoading(false);
     }
@@ -79,9 +83,10 @@ export default function Settings() {
       setEmail("");
       setEvents([]);
 
-      alert("Google disconnected successfully.");
+      toast.success("Google Calendar disconnected.");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to disconnect Google Calendar.");
     }
   };
 
@@ -93,16 +98,20 @@ export default function Settings() {
     try {
       await api.delete(`/api/google/events/${id}`);
 
+      toast.success("Event deleted.");
+
       fetchEvents();
     } catch (err) {
       console.error(err);
+      toast.error("Failed to delete event.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-10">
-      <div className="mx-auto max-w-4xl">
-        <h1 className="mb-8 text-4xl font-bold">
+    <div className="min-h-screen bg-background py-10">
+      <div className="mx-auto max-w-4xl px-6">
+
+        <h1 className="mb-8 text-4xl font-bold text-foreground">
           Google Calendar Settings
         </h1>
 
@@ -114,8 +123,8 @@ export default function Settings() {
         />
 
         {connected && (
-          <>
-            <h2 className="mb-4 text-2xl font-semibold">
+          <div className="mt-10">
+            <h2 className="mb-5 text-2xl font-semibold text-foreground">
               Upcoming Events
             </h2>
 
@@ -124,7 +133,7 @@ export default function Settings() {
               loading={loading}
               onDelete={deleteEvent}
             />
-          </>
+          </div>
         )}
       </div>
     </div>

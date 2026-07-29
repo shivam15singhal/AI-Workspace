@@ -17,7 +17,7 @@ export default function DocumentList({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {documents.map((document) => (
         <DocumentCard
           key={document.id}

@@ -1,10 +1,15 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.llm.service import LLMService
 
 llm_service = LLMService()
+def choose_tool(user_message: str):
+    print("\n" + "=" * 60)
+    print("choose_tool() CALLED")
+    print("Message:", user_message)
+    print("=" * 60)
 
 TOOL_ROUTER_PROMPT = """
 You are an AI Tool Router.
@@ -167,8 +172,8 @@ Response:
     "arguments": {
         "summary": "AI Interview",
         "description": "",
-        "start": "2026-07-28T14:00:00+05:30",
-        "end": "2026-07-28T15:00:00+05:30"
+         "start": "<ISO-8601 datetime>",
+        "end": "<ISO-8601 datetime>"
     }
 }
 
@@ -213,28 +218,39 @@ Response:
         "query": "AI interview tomorrow",
         "summary": "AI Interview",
         "description": "",
-        "start": "2026-08-01T16:00:00+05:30",
-        "end": "2026-08-01T17:00:00+05:30"
+         "start": "<ISO-8601 datetime>",
+        "end": "<ISO-8601 datetime>"
     }
 }
 """
 
 
 def choose_tool(user_message: str):
-    current_datetime = datetime.now(
-        ZoneInfo("Asia/Kolkata")
-    ).isoformat()
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+
+    current_date = now.strftime("%Y-%m-%d")
+    current_day = now.strftime("%A")
+    current_time = now.strftime("%H:%M")
+    tomorrow = (now + timedelta(days=1)).strftime("%Y-%m-%d")
 
     system_prompt = (
         TOOL_ROUTER_PROMPT
         + f"""
 
-Current datetime (Asia/Kolkata):
+Current date: {current_date}
+Current day: {current_day}
+Current time: {current_time}
+Current timezone: Asia/Kolkata
 
-{current_datetime}
+IMPORTANT:
 
-Use this datetime as the reference for resolving
-today, tomorrow, next week, next Monday, etc.
+- Use the current date and day above as the ONLY reference.
+- Resolve ALL relative dates (today, tomorrow, Friday, next Monday, next week, etc.) using this information.
+- "Today" means {current_date}.
+- "Tomorrow" means {tomorrow}.
+- If the user says "Friday", choose the upcoming Friday after today's date.
+- Always return ISO-8601 datetime strings with the +05:30 timezone.
+- Never guess the current date.
 """
     )
 
@@ -257,10 +273,19 @@ today, tomorrow, next week, next Monday, etc.
         .strip()
     )
 
+    print("=" * 60)
+    print("USER:", user_message)
+    print("=" * 60)
+    print(response)
+    print("=" * 60)
+
     try:
         return json.loads(response)
 
-    except Exception:
+    except Exception as e:
+        print("Tool Router JSON Error:", e)
+        print("Raw Response:", response)
+
         return {
             "tool": None
         }

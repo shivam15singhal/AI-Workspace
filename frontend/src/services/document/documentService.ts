@@ -5,6 +5,7 @@ import type { Document } from "@/types/document";
 export async function uploadDocument(
   file: File,
   workspaceId: number,
+  chatId?: number | null,
   onProgress?: (
     progress: number,
   ) => void,
@@ -19,6 +20,7 @@ export async function uploadDocument(
     {
       params: {
         workspace_id: workspaceId,
+        chat_id: chatId,
       },
 
       headers: {
@@ -49,14 +51,31 @@ export async function uploadDocument(
   return response.data;
 }
 
-export async function getDocuments(
+export async function getWorkspaceDocuments(
   workspaceId: number,
 ): Promise<Document[]> {
   const response = await api.get(
-    "/api/documents",
+    "/api/documents/workspace",
     {
       params: {
         workspace_id: workspaceId,
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function getChatDocuments(
+  workspaceId: number,
+  chatId: number,
+): Promise<Document[]> {
+  const response = await api.get(
+    "/api/documents/chat",
+    {
+      params: {
+        workspace_id: workspaceId,
+        chat_id: chatId,
       },
     },
   );

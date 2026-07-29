@@ -31,7 +31,7 @@ export async function register(
   const response = await api.post(
     "/api/auth/register",
     {
-      name: data.name,
+      username: data.name,
       email: data.email,
       password: data.password,
     },

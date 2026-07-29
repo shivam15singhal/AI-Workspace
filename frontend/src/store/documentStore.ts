@@ -1,224 +1,284 @@
 import { create } from "zustand";
 import { toast } from "sonner";
 
+import { useChatStore } from "./chatStore";
 import { useWorkspaceStore } from "./workspaceStore";
 
 import type { Document } from "@/types/document";
 
 import {
   uploadDocument,
-  getDocuments,
+  getWorkspaceDocuments,
+  getChatDocuments,
   deleteDocument,
 } from "@/services/document/documentService";
 
 type DocumentState = {
-  documents: Document[];
+  workspaceDocuments: Document[];
+  chatDocuments: Document[];
 
   uploadProgress: number;
   isUploading: boolean;
 
-  pollingInterval: ReturnType<
-    typeof setInterval
-  > | null;
+  pollingInterval: ReturnType<typeof setInterval> | null;
 
-  fetchDocuments: () => Promise<void>;
+  fetchWorkspaceDocuments: () => Promise<void>;
+  fetchChatDocuments: () => Promise<void>;
 
-  upload: (file: File) => Promise<void>;
+  upload: (
+    file: File,
+    target: "chat" | "workspace",
+  ) => Promise<void>;
 
   remove: (id: number) => Promise<void>;
 
-  startPolling: () => void;
+  startPolling: (
+    target: "chat" | "workspace",
+  ) => void;
 };
 
-export const useDocumentStore =
-  create<DocumentState>((set) => ({
-    documents: [],
+export const useDocumentStore = create<DocumentState>((set) => ({
+  workspaceDocuments: [],
+  chatDocuments: [],
 
-    uploadProgress: 0,
+  uploadProgress: 0,
 
-    isUploading: false,
+  isUploading: false,
 
-    pollingInterval: null,
+  pollingInterval: null,
 
-    fetchDocuments: async () => {
+  fetchWorkspaceDocuments: async () => {
+  const workspace =
+    useWorkspaceStore.getState().selectedWorkspace;
+
+  if (!workspace) {
+    set({
+      workspaceDocuments: [],
+    });
+
+    return;
+  }
+
+  const documents =
+    await getWorkspaceDocuments(workspace.id);
+
+  set({
+    workspaceDocuments: documents,
+  });
+},
+fetchChatDocuments: async () => {
+  const workspace =
+    useWorkspaceStore.getState().selectedWorkspace;
+
+  const chat =
+    useChatStore.getState().selectedChat;
+
+  if (!workspace || !chat) {
+    set({
+      chatDocuments: [],
+    });
+
+    return;
+  }
+
+  const documents =
+    await getChatDocuments(
+      workspace.id,
+      chat.id,
+    );
+
+  set({
+    chatDocuments: documents,
+  });
+},
+
+  upload: async (
+  file,
+  target,
+) => {
+    try {
+      set({
+        isUploading: true,
+        uploadProgress: 0,
+      });
+
       const workspace =
-        useWorkspaceStore.getState()
-          .selectedWorkspace;
+        useWorkspaceStore.getState().selectedWorkspace;
 
       if (!workspace) {
-        set({
-          documents: [],
-        });
+        toast.error(
+          "Please select a workspace.",
+        );
 
         return;
       }
 
-      const documents =
-        await getDocuments(
-          workspace.id,
-        );
+      const chat =
+        useChatStore.getState().selectedChat;
 
+      const document =
+  await uploadDocument(
+    file,
+    workspace.id,
+    target === "chat"
+      ? chat?.id
+      : null,
+    (progress) => {
       set({
-        documents,
+        uploadProgress: progress,
       });
     },
+  );
 
-    upload: async (file) => {
-      try {
-        set({
-          isUploading: true,
-          uploadProgress: 0,
-        });
+      toast.success(
+        `${file.name} uploaded successfully.`,
+      );
 
-        const workspace =
-          useWorkspaceStore.getState()
-            .selectedWorkspace;
-
-        if (!workspace) {
-          toast.error(
-            "Please select a workspace.",
-          );
-
-          return;
-        }
-
-        const document =
-          await uploadDocument(
-            file,
-            workspace.id,
-            (progress) => {
-              set({
-                uploadProgress:
-                  progress,
-              });
-            },
-          );
-
-        toast.success(
-          `${file.name} uploaded successfully.`,
-        );
-
-        set((state) => ({
-          documents: [
-            document,
-            ...state.documents,
-          ],
-
-          uploadProgress: 100,
-        }));
-
-        useDocumentStore
-          .getState()
-          .startPolling();
-      } catch (error) {
-        toast.error(
-          "Failed to upload document.",
-        );
-
-        console.error(error);
-      } finally {
-        set({
-          isUploading: false,
-        });
+      set((state) => ({
+  ...(target === "workspace"
+    ? {
+        workspaceDocuments: [
+          document,
+          ...state.workspaceDocuments,
+        ],
       }
-    },
+    : {
+        chatDocuments: [
+          document,
+          ...state.chatDocuments,
+        ],
+      }),
 
-    remove: async (id) => {
-      try {
-        await deleteDocument(id);
+  uploadProgress: 100,
+}));
 
-        toast.success(
-          "Document deleted.",
-        );
+      useDocumentStore
+        .getState()
+        .startPolling(target);
+    } catch (error) {
+      toast.error(
+        "Failed to upload document.",
+      );
 
-        set((state) => ({
-          documents:
-            state.documents.filter(
-              (document) =>
-                document.id !== id,
-            ),
-        }));
-      } catch (error) {
-        toast.error(
-          "Failed to delete document.",
-        );
+      console.error(error);
+    } finally {
+      set({
+        isUploading: false,
+      });
+    }
+  },
 
-        console.error(error);
-      }
-    },
+  remove: async (id) => {
+    try {
+      await deleteDocument(id);
 
-    startPolling: () => {
-      const state =
-        useDocumentStore.getState();
+      toast.success(
+        "Document deleted.",
+      );
 
-      if (state.pollingInterval) {
-        return;
-      }
+      set((state) => ({
+  workspaceDocuments:
+    state.workspaceDocuments.filter(
+      (document) => document.id !== id,
+    ),
 
-      const interval = setInterval(
-        async () => {
-          try {
-            const workspace =
-              useWorkspaceStore.getState()
-                .selectedWorkspace;
+  chatDocuments:
+    state.chatDocuments.filter(
+      (document) => document.id !== id,
+    ),
+}));
+    } catch (error) {
+      toast.error(
+        "Failed to delete document.",
+      );
 
-            if (!workspace) {
-              clearInterval(
-                interval,
-              );
+      console.error(error);
+    }
+  },
 
-              set({
-                pollingInterval:
-                  null,
-              });
+  startPolling: (target) => {
+    const state =
+      useDocumentStore.getState();
 
-              return;
-            }
+    if (state.pollingInterval) {
+      return;
+    }
 
-            const documents =
-              await getDocuments(
-                workspace.id,
-              );
+    const interval = setInterval(
+      async () => {
+        try {
+          const workspace =
+            useWorkspaceStore.getState()
+              .selectedWorkspace;
 
-            set({
-              documents,
-            });
-
-            const processing =
-              documents.some(
-                (doc) =>
-                  doc.status ===
-                    "uploading" ||
-                  doc.status ===
-                    "processing",
-              );
-
-            if (!processing) {
-              clearInterval(
-                interval,
-              );
-
-              set({
-                pollingInterval:
-                  null,
-              });
-            }
-          } catch (error) {
-            console.error(error);
-
+          if (!workspace) {
             clearInterval(interval);
 
             set({
-              pollingInterval:
-                null,
+              pollingInterval: null,
+            });
+
+            return;
+          }
+
+          const chat =
+            useChatStore.getState().selectedChat;
+
+          const documents =
+  target === "workspace"
+    ? await getWorkspaceDocuments(
+        workspace.id,
+      )
+    : chat
+      ? await getChatDocuments(
+          workspace.id,
+          chat.id,
+        )
+      : [];
+
+          set(
+  target === "workspace"
+    ? {
+        workspaceDocuments:
+          documents,
+      }
+    : {
+        chatDocuments:
+          documents,
+      },
+);
+
+          const processing =
+            documents.some(
+              (doc) =>
+                doc.status ===
+                  "uploading" ||
+                doc.status ===
+                  "processing",
+            );
+
+          if (!processing) {
+            clearInterval(interval);
+
+            set({
+              pollingInterval: null,
             });
           }
-        },
-        2000,
-      );
+        } catch (error) {
+          console.error(error);
 
-      set({
-        pollingInterval: interval,
-      });
-    },
-  }));
+          clearInterval(interval);
+
+          set({
+            pollingInterval: null,
+          });
+        }
+      },
+      2000,
+    );
+
+    set({
+      pollingInterval: interval,
+    });
+  },
+}));

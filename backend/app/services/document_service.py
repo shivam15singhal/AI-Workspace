@@ -40,6 +40,7 @@ def save_document(
     file: UploadFile,
     current_user: User,
     workspace_id: int,
+    chat_id: int | None = None,
 ):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(
@@ -69,8 +70,17 @@ def save_document(
 
     file_path = user_dir / unique_filename
 
+   
+
+    file.file.seek(0, 2)  # Move to end of stream
+    
+
+    file.file.seek(0)  # Go back to beginning
+
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+
+
 
     document = Document(
         filename=file.filename,
@@ -80,6 +90,7 @@ def save_document(
         status="uploading",
         user_id=current_user.id,
         workspace_id=workspace.id,
+        chat_id=chat_id,
     )
 
     db.add(document)
@@ -89,7 +100,7 @@ def save_document(
     return document
 
 
-def get_user_documents(
+def get_workspace_documents(
     db: Session,
     current_user: User,
     workspace_id: int,
@@ -99,6 +110,24 @@ def get_user_documents(
         .filter(
             Document.user_id == current_user.id,
             Document.workspace_id == workspace_id,
+            Document.chat_id.is_(None),
+        )
+        .order_by(Document.id.desc())
+        .all()
+    )
+
+def get_chat_documents(
+    db: Session,
+    current_user: User,
+    workspace_id: int,
+    chat_id: int,
+):
+    return (
+        db.query(Document)
+        .filter(
+            Document.user_id == current_user.id,
+            Document.workspace_id == workspace_id,
+            Document.chat_id == chat_id,
         )
         .order_by(Document.id.desc())
         .all()

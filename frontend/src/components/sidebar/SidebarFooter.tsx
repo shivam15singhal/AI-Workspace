@@ -29,16 +29,8 @@ export default function SidebarFooter() {
               key={item.href}
               to={item.href}
               className={`
-                flex
-                items-center
-                gap-3
-                rounded-xl
-                px-3
-                py-2.5
-                text-sm
-                font-medium
-                transition-all
-                duration-200
+                flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
+                transition-all duration-200
                 ${
                   active
                     ? "bg-primary/10 text-primary ring-1 ring-primary/20"

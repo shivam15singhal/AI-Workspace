@@ -13,6 +13,7 @@ def retrieve_context(
     query: str,
     user_id: int,
     workspace_id: int,
+    chat_id: int | None,
     top_k: int = 5,
 ):
     """

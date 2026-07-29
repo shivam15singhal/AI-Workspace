@@ -1,14 +1,14 @@
+from datetime import datetime
+
 from sqlalchemy import (
     Column,
+    DateTime,
+    ForeignKey,
     Integer,
     String,
-    ForeignKey,
-    DateTime,
 )
 
 from sqlalchemy.orm import relationship
-
-from datetime import datetime
 
 from app.database.database import Base
 
@@ -41,6 +41,7 @@ class Document(Base):
         Integer,
         nullable=False,
     )
+
     status = Column(
         String,
         nullable=False,
@@ -55,23 +56,41 @@ class Document(Base):
 
     user_id = Column(
         Integer,
-        ForeignKey("users.id"),
+        ForeignKey(
+            "users.id",
+        ),
         nullable=False,
     )
+
     workspace_id = Column(
-    Integer,
-    ForeignKey(
-        "workspaces.id",
-        ondelete="CASCADE",
-    ),
-    nullable=False,
+        Integer,
+        ForeignKey(
+            "workspaces.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    
+    chat_id = Column(
+        Integer,
+        ForeignKey(
+            "chats.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
     )
 
     user = relationship(
-    "User",
+        "User",
     )
 
     workspace = relationship(
-    "Workspace",
-    back_populates="documents",
+        "Workspace",
+        back_populates="documents",
+    )
+
+    chat = relationship(
+        "Chat",
+        back_populates="documents",
     )

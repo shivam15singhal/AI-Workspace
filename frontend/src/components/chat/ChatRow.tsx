@@ -29,9 +29,9 @@ export default function ChatRow({
         transition-all
         duration-200
         ${
-          selected
-            ? "bg-primary/10 ring-1 ring-primary/20"
-            : "hover:bg-accent/60"
+         selected
+  ? "bg-primary/10 border border-primary/20 shadow-sm"
+  : "border border-transparent hover:border-border/60 hover:bg-accent/60"
         }
       `}
     >

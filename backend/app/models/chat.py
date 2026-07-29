@@ -7,6 +7,7 @@ from sqlalchemy import (
     Integer,
     String,
 )
+
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -73,9 +74,17 @@ class Chat(Base):
         back_populates="chat",
         cascade="all, delete-orphan",
     )
+
+    # NEW: Documents attached to this chat
+    documents = relationship(
+        "Document",
+        back_populates="chat",
+        cascade="all, delete-orphan",
+    )
+
     summary = relationship(
-    "ConversationSummary",
-    back_populates="chat",
-    uselist=False,
-    cascade="all, delete-orphan",
+        "ConversationSummary",
+        back_populates="chat",
+        uselist=False,
+        cascade="all, delete-orphan",
     )

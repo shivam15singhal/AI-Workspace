@@ -55,9 +55,7 @@ def save_assistant_message(
     chat_id: int,
     content: str,
 ) -> Message:
-    """
-    Save the assistant's response.
-    """
+   
 
     message = Message(
         chat_id=chat_id,
@@ -192,10 +190,11 @@ def create_message(
     )
 
     context, sources = retrieve_context(
-        query=message_data.content,
-        user_id=current_user.id,
-        workspace_id=chat.workspace_id,
-    )
+    query=message_data.content,
+    user_id=current_user.id,
+    workspace_id=chat.workspace_id,
+    chat_id=chat.id,
+)
 
     conversation = build_prompt(
     db=db,
@@ -309,10 +308,11 @@ def stream_ai_response(
     )
 
     context, sources = retrieve_context(
-        query=message_data.content,
-        user_id=current_user.id,
-        workspace_id=chat.workspace_id,
-    )
+    query=message_data.content,
+    user_id=current_user.id,
+    workspace_id=chat.workspace_id,
+    chat_id=chat.id,
+)
 
     conversation = build_prompt(
     db=db,
@@ -395,10 +395,11 @@ def stream_ai_response_after_edit(
     )
 
     context, sources = retrieve_context(
-        query=message.content,
-        user_id=current_user.id,
-        workspace_id=chat.workspace_id,
-    )
+    query=message.content,
+    user_id=current_user.id,
+    workspace_id=chat.workspace_id,
+    chat_id=chat.id,
+)
 
     conversation = build_prompt(
     db=db,

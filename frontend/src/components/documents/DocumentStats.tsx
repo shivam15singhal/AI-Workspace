@@ -41,14 +41,43 @@ export default function DocumentStats({
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <div className="rounded-xl border bg-card p-5">
-        <FileText className="mb-3 h-6 w-6 text-primary" />
+      <div className="
+group
+rounded-2xl
+border
+border-border/60
+bg-card
+p-6
+shadow-sm
+transition-all
+duration-200
+hover:-translate-y-1
+hover:border-primary/20
+hover:shadow-lg
+">
+        <div
+  className="
+    mb-4
+    flex
+    h-12
+    w-12
+    items-center
+    justify-center
+    rounded-2xl
+    bg-primary/10
+    transition-colors
+    duration-200
+    group-hover:bg-primary/15
+  "
+>
+  <FileText className="h-6 w-6 text-primary" />
+</div>
 
-        <p className="text-2xl font-bold">
+        <p className="text-3xl font-bold tracking-tight">
           {documents.length}
         </p>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm font-medium text-muted-foreground">
           Documents
         </p>
       </div>

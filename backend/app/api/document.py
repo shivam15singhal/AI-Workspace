@@ -16,7 +16,8 @@ from app.schemas.document import DocumentResponse
 
 from app.services.document_service import (
     save_document,
-    get_user_documents,
+    get_workspace_documents,
+    get_chat_documents,
     delete_document,
 )
 
@@ -37,6 +38,7 @@ router = APIRouter(
 def upload_document(
     background_tasks: BackgroundTasks,
     workspace_id: int,
+    chat_id: int | None = None,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -46,6 +48,7 @@ def upload_document(
         file=file,
         current_user=current_user,
         workspace_id=workspace_id,
+        chat_id=chat_id,
     )
 
     background_tasks.add_task(
@@ -57,19 +60,36 @@ def upload_document(
 
 
 @router.get(
-    "",
+    "/workspace",
     response_model=List[DocumentResponse],
 )
-def list_documents(
+def list_workspace_documents(
     workspace_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_user_documents(
+    return get_workspace_documents(
         db=db,
         current_user=current_user,
         workspace_id=workspace_id,
+    )
 
+
+@router.get(
+    "/chat",
+    response_model=List[DocumentResponse],
+)
+def list_chat_documents(
+    workspace_id: int,
+    chat_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_chat_documents(
+        db=db,
+        current_user=current_user,
+        workspace_id=workspace_id,
+        chat_id=chat_id,
     )
 
 

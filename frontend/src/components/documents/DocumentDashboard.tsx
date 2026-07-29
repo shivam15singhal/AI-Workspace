@@ -25,19 +25,34 @@ export default function DocumentDashboard({
     <div className="space-y-6">
       <DocumentStats documents={documents} />
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="w-full md:max-w-md">
-          <DocumentSearch
-            value={search}
-            onChange={onSearchChange}
-          />
-        </div>
+      <div
+  className="
+    flex
+    flex-col
+    gap-4
+    rounded-2xl
+    border
+    border-border/60
+    bg-card
+    p-5
+    shadow-sm
+    md:flex-row
+    md:items-center
+    md:justify-between
+  "
+>
+  <div className="w-full md:max-w-md">
+    <DocumentSearch
+      value={search}
+      onChange={onSearchChange}
+    />
+  </div>
 
-        <DocumentSort
-          value={sort}
-          onChange={onSortChange}
-        />
-      </div>
+  <DocumentSort
+    value={sort}
+    onChange={onSortChange}
+  />
+</div>
     </div>
   );
 }

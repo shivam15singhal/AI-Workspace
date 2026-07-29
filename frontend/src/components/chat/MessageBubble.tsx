@@ -171,18 +171,18 @@ export default function MessageBubble({
         </Avatar>
       )}
 
-      {/* Message Container */}
 
       <div
         className={
           isEditing
-            ? "w-full max-w-3xl"
-            : "max-w-3xl"
+           ? "w-full max-w-4xl"
+      : isUser
+      ? "max-w-2xl"
+      : "w-full max-w-4xl"
         }
       >
         {isEditing ? (
-          /* Edit Prompt UI */
-
+  
           <div className="rounded-2xl border bg-card p-3 shadow-sm">
             <Textarea
               value={
@@ -262,13 +262,12 @@ export default function MessageBubble({
           </div>
         ) : (
           <>
-            {/* Message Bubble */}
 
             <div
-              className={`rounded-2xl px-5 py-3 shadow-sm ${
+              className={`rounded-2xl px-6 py-4 shadow-sm ${
                 isUser
-                  ? "bg-primary text-primary-foreground"
-                  : "rounded-2xl border border-border/60 bg-card shadow-sm"
+  ? "bg-linear-to-br from-indigo-600 via-violet-600 to-purple-600 text-white shadow-lg border border-indigo-400/20"
+  : "rounded-2xl border border-border/60 bg-card shadow-sm"
               }`}
             >
               {message.content && (
@@ -369,7 +368,6 @@ export default function MessageBubble({
               </div>
             )}
 
-            {/* Regenerate Action */}
 
             {canRegenerate && (
               <div className="mt-2">
@@ -397,11 +395,17 @@ export default function MessageBubble({
         )}
       </div>
 
-      {/* User Avatar */}
 
       {isUser && (
         <Avatar className="h-9 w-9 shrink-0">
-          <AvatarFallback>
+          <AvatarFallback
+className="
+bg-linear-to-br
+from-slate-700
+to-slate-900
+text-white
+"
+>
             <User className="h-5 w-5" />
           </AvatarFallback>
         </Avatar>

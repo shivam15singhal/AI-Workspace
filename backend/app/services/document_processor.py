@@ -52,26 +52,38 @@ def process_document(
 
         file_path = Path(document.filepath)
 
-        # Extract text using the unified FileParser
+        
         text = FileParser.extract_text(file_path)
 
         chunks = chunk_text(text)
+        
 
         for index, chunk in enumerate(chunks):
             embedding = llm_service.embedding(chunk)
+
+            metadata = {
+                "document_id": int(document.id),
+                "user_id": int(document.user_id),
+                "workspace_id": int(document.workspace_id),
+                "filename": str(document.filename),
+                "document_type": (
+                    "workspace"
+                    if document.chat_id is None
+                    else "chat"
+                ),
+                "chunk_index": int(index),
+            }
+
+            
+            if document.chat_id is not None:
+                metadata["chat_id"] = int(document.chat_id)
+                
 
             documents_collection.add(
                 ids=[f"{document.id}_{index}"],
                 embeddings=[embedding],
                 documents=[chunk],
-                metadatas=[
-                    {
-                        "document_id": document.id,
-                        "user_id": document.user_id,
-                        "workspace_id": document.workspace_id,
-                        "chunk_index": index,
-                    }
-                ],
+                metadatas=[metadata],
             )
 
         document.status = "ready"

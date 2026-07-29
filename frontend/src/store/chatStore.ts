@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { useWorkspaceStore } from "@/store/workspaceStore";
-
+import { useDocumentStore } from "@/store/documentStore";
 import type { Chat } from "@/types/chat";
 import type { Message } from "@/types/message";
 
@@ -139,6 +139,9 @@ export const useChatStore =
             await getMessages(
               chats[0].id,
             );
+             await useDocumentStore
+    .getState()
+    .fetchChatDocuments();
 
           set({
             messages:normalizeMessages(messages),
@@ -259,18 +262,22 @@ export const useChatStore =
         controller.abort();
       }
 
-      set({
-        selectedChat: chat,
-        isGenerating: false,
-        abortController: null,
-      });
-
-      const messages =
-        await getMessages(
-          chat.id,
-        );
+      
 
       set({
+  selectedChat: chat,
+  isGenerating: false,
+  abortController: null,
+});
+
+const [messages] = await Promise.all([
+  getMessages(chat.id),
+  useDocumentStore
+    .getState()
+    .fetchChatDocuments(),
+]);
+
+set({
   messages:
     normalizeMessages(messages),
 });
@@ -320,8 +327,7 @@ export const useChatStore =
     return;
   }
 
-  // Find the user prompt immediately
-  // before this assistant response.
+  
   let userMessage: Message | undefined;
 
   for (
@@ -530,11 +536,6 @@ editPrompt: async (
   const chatId =
     state.selectedChat.id;
 
-  /*
-   * Backend:
-   * - updates the existing user message
-   * - deletes every message after it
-   */
   const updatedMessage =
     await editMessage(
       messageId,
@@ -561,14 +562,7 @@ editPrompt: async (
   const controller =
     new AbortController();
 
-  /*
-   * Remove the old conversation branch
-   * locally as well.
-   *
-   * Keep everything BEFORE the edited
-   * message, then insert the updated
-   * message and new assistant placeholder.
-   */
+  
   set((currentState) => {
     const currentIndex =
       currentState.messages.findIndex(
@@ -709,15 +703,7 @@ editPrompt: async (
     });
   }
 
-  /*
-   * Replace temporary frontend IDs with
-   * persisted PostgreSQL messages only
-   * after successful generation.
-   *
-   * Do not reload after abort/failure,
-   * otherwise local status information
-   * would disappear.
-   */
+  
   if (completedSuccessfully) {
     try {
       const messages =

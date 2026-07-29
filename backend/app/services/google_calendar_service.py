@@ -215,9 +215,7 @@ def list_calendar_events(
         "end": event["end"].get("dateTime", event["end"].get("date")),
     })
 
-    return {
-    "result": formatted_events
-}
+    return formatted_events
 
 def create_calendar_event(
     db: Session,
@@ -265,7 +263,7 @@ def create_calendar_event(
 def delete_calendar_event(
     db: Session,
     current_user: User,
-    summary: str,
+    event_id: str,
 ):
     credentials = get_google_credentials(
         db,
@@ -278,55 +276,19 @@ def delete_calendar_event(
         credentials=credentials,
     )
 
-    time_min = (
-    datetime.now(timezone.utc) - timedelta(days=30)
-).isoformat()
-
-    events = (
-        service.events()
-        .list(
-            calendarId="primary",
-            timeMin=time_min,
-            maxResults=100,
-            singleEvents=True,
-            orderBy="startTime",
-        )
-        .execute()
-        .get("items", [])
-    )
-
-    target_event = None
-
-    for event in events:
-        event_summary = event.get("summary", "").strip().lower()
-        target_summary = summary.strip().lower()
-
-        if (
-        target_summary in event_summary
-        or event_summary in target_summary
-        ):
-            target_event = event
-            break
-
-    if target_event is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Event '{summary}' not found.",
-        )
-
     service.events().delete(
-        calendarId="primary",
-        eventId=target_event["id"],
-    ).execute()
+    calendarId="primary",
+    eventId=event_id,
+).execute()
 
     return {
-        "result": f"Deleted '{summary}' successfully."
-    }
-    
+    "message": "Event deleted successfully."
+}
 
 def update_calendar_event(
-    db: Session,
+     db: Session,
     current_user: User,
+    event_id: str,
     summary: str,
     description: str,
     start: str,
@@ -343,52 +305,14 @@ def update_calendar_event(
         credentials=credentials,
     )
 
-    time_min = (
-    datetime.now(timezone.utc) - timedelta(days=30)
-).isoformat()
-
-    events = (
-        service.events()
-        .list(
-            calendarId="primary",
-            timeMin=time_min,
-            maxResults=100,
-            singleEvents=True,
-            orderBy="startTime",
-        )
-        .execute()
-        .get("items", [])
+    target_event = (
+    service.events()
+    .get(
+        calendarId="primary",
+        eventId=event_id,
     )
-  
-
-    for event in events:
-        print(
-        event.get("summary"),
-        event.get("id"),
-        event["start"].get("dateTime", event["start"].get("date")),
-    )
-
-    
-
-    target_event = None
-
-    for event in events:
-        event_summary = event.get("summary", "").strip().lower()
-        target_summary = summary.strip().lower()
-
-        if (
-            target_summary in event_summary
-            or event_summary in target_summary
-        ):
-            target_event = event
-            break
-
-    if target_event is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Event '{summary}' not found.",
-        )
-
+    .execute()
+)
     target_event["summary"] = summary
     target_event["description"] = description
     target_event["start"] = {
@@ -401,15 +325,15 @@ def update_calendar_event(
     }
 
     updated_event = service.events().update(
-        calendarId="primary",
-        eventId=target_event["id"],
-        body=target_event,
-    ).execute()
+    calendarId="primary",
+    eventId=event_id,
+    body=target_event,
+).execute()
 
     return {
-        "result": f"Updated '{summary}' successfully.",
-        "event": updated_event,
-    }
+    "message": "Event updated successfully.",
+    "event": updated_event,
+}
 
 def get_google_connection_status(
     db: Session,

@@ -126,14 +126,14 @@ def update_event(
     current_user: User = Depends(get_current_user),
 ):
     event = update_calendar_event(
-        db=db,
-        current_user=current_user,
-        event_id=event_id,
-        summary=request.summary,
-        description=request.description or "",
-        start=request.start,
-        end=request.end,
-    )
+    db=db,
+    current_user=current_user,
+    event_id=event_id,
+    summary=request.summary,
+    description=request.description or "",
+    start=request.start,
+    end=request.end,
+)
 
     return {
         "message": "Event updated successfully",

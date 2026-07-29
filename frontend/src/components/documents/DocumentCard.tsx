@@ -83,13 +83,16 @@ export default function DocumentCard({
           flex
           items-center
           justify-between
-          rounded-xl
+          rounded-2xl
           border
+          border-border/60
           bg-card
-          p-4
+          p-5
           transition-all
-          hover:-translate-y-0.5
-          hover:shadow-lg
+          duration-200
+hover:-translate-y-1
+hover:border-primary/20
+hover:shadow-lg
         "
       >
         <div className="flex items-center gap-4">
@@ -101,7 +104,7 @@ export default function DocumentCard({
           </div>
 
           <div>
-            <h3 className="font-medium">
+            <h3 className="max-w-md truncate text-base font-semibold">
               {document.filename}
             </h3>
 

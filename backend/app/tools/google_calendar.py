@@ -1,6 +1,6 @@
 from app.tools.base import BaseTool
 from app.tools.tool_context import ToolContext
-
+from app.services.calendar_search import CalendarSearch
 from app.services.google_calendar_service import (
     create_calendar_event,
     list_calendar_events,
@@ -59,22 +59,33 @@ class CalendarDeleteTool(BaseTool):
 
     name = "calendar.delete"
 
-    description = (
-        "Deletes a Google Calendar event."
-    )
+    description = "Deletes a Google Calendar event."
 
     def execute(
-    self,
-    context: ToolContext,
-    summary: str,
-    **kwargs,
-):
-        return delete_calendar_event(
-        db=context.db,
-        current_user=context.current_user,
-        summary=summary,
-    )
+        self,
+        context: ToolContext,
+        query: str,
+        **kwargs,
+    ):
 
+        search = CalendarSearch(
+            context.db,
+            context.current_user,
+        )
+
+        event = search.find_event(query)
+
+        if event is None:
+            return {
+                "success": False,
+                "message": "Event not found."
+            }
+
+        return delete_calendar_event(
+            db=context.db,
+            current_user=context.current_user,
+            event_id=event["id"],
+        )
 
 class CalendarUpdateTool(BaseTool):
 
@@ -87,15 +98,30 @@ class CalendarUpdateTool(BaseTool):
     def execute(
         self,
         context: ToolContext,
+        query: str,
         summary: str,
         start: str,
         end: str,
         description: str = "",
         **kwargs,
     ):
+        search = CalendarSearch(
+            context.db,
+            context.current_user,
+        )
+
+        event = search.find_event(query)
+
+        if event is None:
+            return {
+                "success": False,
+                "message": "Event not found."
+            }
+
         return update_calendar_event(
             db=context.db,
             current_user=context.current_user,
+            event_id=event["id"],
             summary=summary,
             description=description,
             start=start,

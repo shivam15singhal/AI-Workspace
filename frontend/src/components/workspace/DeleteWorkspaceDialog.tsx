@@ -29,36 +29,50 @@ export default function DeleteWorkspaceDialog({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            Delete Workspace?
+      <AlertDialogContent className="rounded-2xl border border-border/60 shadow-xl">
+        <AlertDialogHeader className="space-y-3">
+          <AlertDialogTitle className="text-xl font-semibold tracking-tight">
+            Delete Workspace
           </AlertDialogTitle>
 
-          <AlertDialogDescription>
+          <AlertDialogDescription className="leading-7 text-muted-foreground">
             {workspace ? (
               <>
-                Are you sure you want to delete{" "}
-                <strong>{workspace.name}</strong>?
+                You're about to permanently delete{" "}
+                <span className="font-semibold text-foreground">
+                  {workspace.name}
+                </span>
+                .
+                <br />
+                <br />
+                All chats, documents, AI agents, settings, and associated
+                workspace data will be permanently removed.
                 <br />
                 <br />
                 This action cannot be undone.
               </>
             ) : (
-              "This action cannot be undone."
+              <>
+                This workspace and all associated data will be permanently
+                deleted.
+                <br />
+                <br />
+                This action cannot be undone.
+              </>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>
+          <AlertDialogCancel className="rounded-xl">
             Cancel
           </AlertDialogCancel>
 
           <AlertDialogAction
             onClick={onConfirm}
+            className="rounded-xl bg-destructive hover:bg-destructive/90"
           >
-            Delete
+            Delete Workspace
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

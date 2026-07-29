@@ -1,4 +1,7 @@
-import { Folder } from "lucide-react";
+import {
+  Folder,
+  Calendar,
+} from "lucide-react";
 
 import type { Workspace } from "@/types/workspace";
 
@@ -16,6 +19,12 @@ type Props = {
   onDelete: () => void | Promise<void>;
 };
 
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString([], {
+    dateStyle: "medium",
+  });
+}
+
 export default function WorkspaceCard({
   workspace,
   onOpen,
@@ -25,25 +34,40 @@ export default function WorkspaceCard({
   return (
     <div
       className="
+        group
         rounded-2xl
         border
+        border-border/60
         bg-card
         p-6
+        shadow-sm
         transition-all
+        duration-200
         hover:-translate-y-1
+        hover:border-primary/20
         hover:shadow-lg
       "
     >
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-xl"
+          className="
+            flex
+            h-14
+            w-14
+            items-center
+            justify-center
+            rounded-2xl
+            transition-all
+            duration-200
+            group-hover:scale-105
+          "
           style={{
-            backgroundColor:
-              workspace.color + "20",
+            backgroundColor: `${workspace.color}20`,
           }}
         >
           <Folder
-            className="h-6 w-6"
+            className="h-7 w-7"
             style={{
               color: workspace.color,
             }}
@@ -57,25 +81,33 @@ export default function WorkspaceCard({
         />
       </div>
 
-      <h2 className="mt-5 text-lg font-semibold">
-        {workspace.name}
-      </h2>
+      {/* Workspace Name */}
+      <div className="mt-5">
+        <h2 className="truncate text-xl font-semibold tracking-tight">
+          {workspace.name}
+        </h2>
 
-      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-        {workspace.description ||
-          "No description"}
-      </p>
+        <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-6 text-muted-foreground">
+          {workspace.description ||
+            "No description provided."}
+        </p>
+      </div>
 
+      {/* Footer */}
       <div className="mt-6 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">
-          Created{" "}
-          {new Date(
-            workspace.created_at,
-          ).toLocaleDateString()}
-        </span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Calendar className="h-4 w-4" />
 
-        <Button onClick={onOpen}>
-          Open
+          <span>
+            Created {formatDate(workspace.created_at)}
+          </span>
+        </div>
+
+        <Button
+          onClick={onOpen}
+          className="rounded-xl px-5"
+        >
+          Open Workspace
         </Button>
       </div>
     </div>

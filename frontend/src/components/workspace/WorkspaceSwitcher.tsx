@@ -34,7 +34,7 @@ export default function WorkspaceSwitcher() {
   } = useWorkspaceStore();
 
   const { fetchChats } = useChatStore();
-  const { fetchDocuments } = useDocumentStore();
+  const { fetchWorkspaceDocuments } = useDocumentStore();
 
   const [dialogOpen, setDialogOpen] =
     useState(false);
@@ -55,7 +55,7 @@ export default function WorkspaceSwitcher() {
       ) {
         await Promise.all([
           fetchChats(),
-          fetchDocuments(),
+          fetchWorkspaceDocuments(),
         ]);
       }
     }
@@ -64,7 +64,7 @@ export default function WorkspaceSwitcher() {
   }, [
     fetchWorkspaces,
     fetchChats,
-    fetchDocuments,
+    fetchWorkspaceDocuments,
   ]);
 
   async function handleWorkspaceSelect(
@@ -74,7 +74,7 @@ export default function WorkspaceSwitcher() {
 
     await Promise.all([
       fetchChats(),
-      fetchDocuments(),
+      fetchWorkspaceDocuments(),
     ]);
   }
 

@@ -147,9 +147,11 @@ Return:
 {
   "tool": "calendar.delete",
   "arguments": {
-    "summary": "Event title"
+    "query": "Existing event name or identifying text"
   }
 }
+
+
 
 9. Use calendar.update when the user asks:
 
@@ -163,13 +165,20 @@ Return:
 {
   "tool": "calendar.update",
   "arguments": {
-    "summary": "Event title",
+    "query": "Existing event name or identifying text",
+    "summary": "Updated event title",
     "description": "",
     "start": "ISO8601 datetime",
     "end": "ISO8601 datetime"
   }
 }
 
+For calendar.update and calendar.delete:
+
+- Always include a "query" field.
+- The query should identify the EXISTING event that must be searched.
+- The summary represents the NEW title after the update.
+- If the title is not changing, keep the same summary.
 
 10. Use meeting_scheduler when the user wants BOTH:
 
@@ -273,7 +282,7 @@ Delete Team Meeting
 {
   "tool": "calendar.delete",
   "arguments": {
-    "summary": "Team Meeting"
+    "query": "Team Meeting"
   }
 }
 
@@ -285,6 +294,7 @@ Move Team Meeting to tomorrow at 5 PM.
 {
   "tool": "calendar.update",
   "arguments": {
+    "query": "Team Meeting",
     "summary": "Team Meeting",
     "description": "",
     "start": "2026-07-29T17:00:00+05:30",

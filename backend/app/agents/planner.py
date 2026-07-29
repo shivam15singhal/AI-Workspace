@@ -1,5 +1,6 @@
 import json
-
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from app.llm.service import LLMService
 from app.agents.prompts import PLANNER_TEMPLATE
 from app.tools.tool_registry import get_tool_descriptions
@@ -17,12 +18,27 @@ class Planner:
             "{tools}",
             get_tool_descriptions(),
         )
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
+
+        date_context = f"""
+    Current date and time:
+    - Current date: {now.strftime("%Y-%m-%d")}
+    - Current day: {now.strftime("%A")}
+    - Current time: {now.strftime("%H:%M")}
+    - Tomorrow: {(now + timedelta(days=1)).strftime("%Y-%m-%d")}
+
+IMPORTANT:
+When the user says "today", "tomorrow", "Friday", "next Monday", etc.,
+always resolve them relative to the current date above.
+
+For calendar tools, always output complete ISO-8601 datetime strings.
+"""
 
         response = llm.generate(
             [
                 {
                     "role": "system",
-                    "content": prompt,
+                    "content": prompt + "\n\n" + date_context,
                 },
                 {
                     "role": "user",
@@ -30,6 +46,12 @@ class Planner:
                 },
             ]
         )
+        print("=" * 60)
+        print("Planner user message:")
+        print(user_message)
+        print("\nPlanner raw response:")
+        print(response)
+        print("=" * 60)
 
         response = (
             response.replace("```json", "")
@@ -40,15 +62,12 @@ class Planner:
         
 
         try:
-            plan = json.loads(response)
-
-           
-
-            return plan
+            return json.loads(response)
 
         except Exception as e:
-            
+            print("Planner JSON parse error:", e)
+            print(response)
 
             return {
-                "tool": None,
-            }
+            "tool": None,
+        }

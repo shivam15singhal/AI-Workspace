@@ -41,15 +41,25 @@ export const useWorkspaceStore =
 
     selectedWorkspace: null,
 
-    fetchWorkspaces: async () => {
+    fetchWorkspaces: 
+    async () => {
       const workspaces =
         await getWorkspaces();
+set((state) => {
+    const currentSelection = state.selectedWorkspace;
 
-      set({
-        workspaces,
-        selectedWorkspace:
-          workspaces[0] ?? null,
-      });
+    const selected =
+      currentSelection &&
+      workspaces.find(
+        (w) => w.id === currentSelection.id
+      );
+
+    return {
+      workspaces,
+      selectedWorkspace:
+        selected ?? workspaces[0] ?? null,
+    };
+  });
     },
 
     selectWorkspace: (
