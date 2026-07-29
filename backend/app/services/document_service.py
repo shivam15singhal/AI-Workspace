@@ -4,12 +4,12 @@ import uuid
 from app.models.workspace import Workspace
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
-
+from app.core.config import settings
 from app.models.document import Document
 from app.models.user import User
-from app.models.workspace import Workspace
 
-UPLOAD_DIR = Path("uploads")
+
+UPLOAD_DIR = Path(settings.UPLOAD_DIR)
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 ALLOWED_TYPES = {
@@ -65,17 +65,17 @@ def save_document(
     user_dir = UPLOAD_DIR / f"user_{current_user.id}"
     user_dir.mkdir(exist_ok=True)
 
-    extension = Path(file.filename).suffix
+    extension = Path(file.filename).suffix.lower()
     unique_filename = f"{uuid.uuid4()}{extension}"
 
     file_path = user_dir / unique_filename
 
    
 
-    file.file.seek(0, 2)  # Move to end of stream
+    file.file.seek(0, 2)  
     
 
-    file.file.seek(0)  # Go back to beginning
+    file.file.seek(0)  
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)

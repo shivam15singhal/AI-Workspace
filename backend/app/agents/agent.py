@@ -1,5 +1,3 @@
-import json
-
 from app.agents.planner import Planner
 from app.agents.executor import Executor
 from app.agents.messages import build_tool_message
@@ -43,8 +41,6 @@ class Agent:
             latest_user_message,
         )
 
-        
-
         tool = plan.get("tool")
 
         if tool is None:
@@ -57,9 +53,7 @@ class Agent:
             "arguments",
             {},
         )
-        # -----------------------------
-# Validate planner output
-# -----------------------------
+
 
         if tool == "calendar.update":
             required = ["query", "summary", "start", "end"]
@@ -75,10 +69,6 @@ class Agent:
                 raise ValueError(
                 "Planner missing 'query' for calendar.delete"
             )
-
-        # -----------------------------
-        # Python Agent
-        # -----------------------------
 
         if tool == "python":
 
@@ -124,11 +114,6 @@ class Agent:
             conversation,
             context=context,
         )
-
-        
-
-        
-
 
         return self.llm.generate(
             conversation,

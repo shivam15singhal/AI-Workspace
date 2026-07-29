@@ -1,6 +1,6 @@
 import api from "@/api/axios";
 import type { Message } from "@/types/message";
-
+const API_URL = import.meta.env.VITE_API_URL;
 export async function getMessages(
   chatId: number,
 ): Promise<Message[]> {
@@ -38,7 +38,7 @@ export async function streamMessage(
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    "http://localhost:8000/api/messages/stream",
+    `${API_URL}/api/messages/stream`,
     {
       signal,
       method: "POST",
@@ -98,7 +98,7 @@ export async function streamEditedMessage(
     localStorage.getItem("token");
 
   const response = await fetch(
-    `http://localhost:8000/api/messages/${messageId}/regenerate`,
+    `${API_URL}/api/messages/${messageId}/regenerate`,
     {
       method: "POST",
 

@@ -1,7 +1,6 @@
 import {
   Calendar,
   Clock,
-  Pencil,
   Trash2,
 } from "lucide-react";
 
@@ -89,13 +88,7 @@ export default function EventCard({
 
       {/* Actions */}
       <div className="mt-6 flex justify-end gap-3">
-        <Button
-          variant="outline"
-          className="rounded-xl"
-        >
-          <Pencil className="mr-2 h-4 w-4" />
-          Edit
-        </Button>
+        
 
         <Button
           variant="destructive"

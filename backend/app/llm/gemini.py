@@ -73,7 +73,7 @@ User message:
         text: str,
     ):
         response = self.client.models.embed_content(
-            model="gemini-embedding-001",
+            model=settings.GEMINI_EMBEDDING_MODEL,
             contents=text,
         )
 

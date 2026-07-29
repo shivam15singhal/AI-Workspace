@@ -55,7 +55,7 @@ class FileParser:
 
     @staticmethod
     def _extract_docx(path: Path) -> str:
-        import zipfile
+        
 
        
         document = Document(path)

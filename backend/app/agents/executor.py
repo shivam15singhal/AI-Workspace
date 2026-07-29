@@ -1,6 +1,8 @@
 from app.tools.tool_executor import execute_tool
 
+import logging
 
+logger = logging.getLogger(__name__)
 class Executor:
 
     def execute(
@@ -21,7 +23,7 @@ class Executor:
             return result
 
         except Exception as e:
-            print(e)
+            logger.exception("Tool execution failed")
             return {
                 "error": str(e),
             }

@@ -11,12 +11,10 @@ export interface Message {
   content: string;
   created_at: string;
 
-  // Existing UI compatibility
   streaming?: boolean;
 
-  // New lifecycle state
   status?: MessageStatus;
 
-  // Reserved for future features (Retry, Edit, Regenerate)
+  
   error?: string;
 }

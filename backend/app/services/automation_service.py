@@ -1,6 +1,6 @@
 import requests
-
-BASE_URL = "http://localhost:5678/webhook"
+from app.core.config import settings
+BASE_URL = settings.N8N_BASE_URL
 
 
 def trigger_workflow(

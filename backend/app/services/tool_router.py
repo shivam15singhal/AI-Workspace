@@ -5,11 +5,7 @@ from zoneinfo import ZoneInfo
 from app.llm.service import LLMService
 
 llm_service = LLMService()
-def choose_tool(user_message: str):
-    print("\n" + "=" * 60)
-    print("choose_tool() CALLED")
-    print("Message:", user_message)
-    print("=" * 60)
+
 
 TOOL_ROUTER_PROMPT = """
 You are an AI Tool Router.
@@ -223,8 +219,6 @@ Response:
     }
 }
 """
-
-
 def choose_tool(user_message: str):
     now = datetime.now(ZoneInfo("Asia/Kolkata"))
 
@@ -272,12 +266,6 @@ IMPORTANT:
         .replace("```", "")
         .strip()
     )
-
-    print("=" * 60)
-    print("USER:", user_message)
-    print("=" * 60)
-    print(response)
-    print("=" * 60)
 
     try:
         return json.loads(response)

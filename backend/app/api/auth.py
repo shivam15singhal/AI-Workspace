@@ -38,7 +38,7 @@ def login(
 ):
     authenticated_user = authenticate_user(
         db,
-        form_data.username,   # username field contains email
+        form_data.username,   
         form_data.password,
     )
 

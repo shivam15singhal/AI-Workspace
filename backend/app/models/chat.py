@@ -75,7 +75,7 @@ class Chat(Base):
         cascade="all, delete-orphan",
     )
 
-    # NEW: Documents attached to this chat
+  
     documents = relationship(
         "Document",
         back_populates="chat",

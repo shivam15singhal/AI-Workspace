@@ -46,20 +46,12 @@ For calendar tools, always output complete ISO-8601 datetime strings.
                 },
             ]
         )
-        print("=" * 60)
-        print("Planner user message:")
-        print(user_message)
-        print("\nPlanner raw response:")
-        print(response)
-        print("=" * 60)
-
+        
         response = (
             response.replace("```json", "")
             .replace("```", "")
             .strip()
         )
-
-        
 
         try:
             return json.loads(response)

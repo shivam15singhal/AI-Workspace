@@ -29,7 +29,7 @@ def chat(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    print("AI CHAT ROUTE HIT")
+  
     tool = choose_tool(
         request.message
     )

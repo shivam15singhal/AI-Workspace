@@ -75,7 +75,7 @@ def understand_calendar_request(message: str):
     prompt = f"{SYSTEM_PROMPT}\n\nUser:\n{message}"
 
     response = client.models.generate_content(
-        model="gemini-flash-latest",
+        model=settings.GEMINI_MODEL,
         contents=prompt,
     )
 

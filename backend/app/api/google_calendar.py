@@ -10,6 +10,7 @@ from app.schemas.google_calendar import (
     CreateEventRequest,
     UpdateEventRequest,
 )
+from app.core.config import settings
 from app.services.google_calendar_service import (
     get_authorization_url,
     exchange_code_for_tokens,
@@ -28,9 +29,7 @@ router = APIRouter(
     tags=["Google Calendar"],
 )
 
-# Temporary in-memory store
 oauth_sessions = {}
-
 
 @router.get("/login")
 def google_login(
@@ -40,12 +39,7 @@ def google_login(
 
     authorization_url, code_verifier = get_authorization_url(state)
 
-    print("AUTH URL:", authorization_url)
-
     oauth_sessions[state] = code_verifier
-
-    print("STATE:", state)
-    print("VERIFIER:", code_verifier)
 
     return JSONResponse(
         {
@@ -179,8 +173,6 @@ def google_callback(
         code_verifier,
     )
 
-    
-
     response = requests.get(
         "https://www.googleapis.com/calendar/v3/users/me/calendarList",
         headers={
@@ -188,14 +180,9 @@ def google_callback(
         },
     )
 
-    
-
     response.raise_for_status()
 
-    # If Calendar API works, then test user info
     google_user = get_google_user_info(credentials)
-
-    
 
     save_google_account(
         db=db,
@@ -205,5 +192,5 @@ def google_callback(
     )
 
     return RedirectResponse(
-        url="http://localhost:5173/settings?google=connected"
+        url=f"{settings.FRONTEND_URL}/settings?google=connected"
     )

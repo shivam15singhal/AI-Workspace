@@ -3,7 +3,7 @@ import ollama
 from typing import Generator
 
 from app.llm.base import BaseLLM
-
+from app.core.config import settings
 
 class OllamaLLM(BaseLLM):
     """
@@ -92,7 +92,7 @@ class OllamaLLM(BaseLLM):
         text: str,
     ):
         response = ollama.embeddings(
-            model="bge-m3",
+            model=settings.OLLAMA_EMBEDDING_MODEL,
             prompt=text,
         )
 

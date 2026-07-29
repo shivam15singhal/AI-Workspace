@@ -1,9 +1,10 @@
 import chromadb
 
-client = chromadb.PersistentClient(
-    path="chroma_db",
-)
+from app.core.config import settings
 
+client = chromadb.PersistentClient(
+    path=settings.CHROMA_DB_PATH,
+)
 documents_collection = (
     client.get_or_create_collection(
         name="documents",

@@ -68,7 +68,6 @@ export default function Settings() {
 
       setEvents(response.data.events);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to load calendar events.");
     } finally {
       setLoading(false);

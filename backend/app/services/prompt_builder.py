@@ -42,9 +42,6 @@ def build_prompt(
         }
     ]
 
-    # -----------------------------
-    # Workspace Memories
-    # -----------------------------
 
     memories = retrieve_memories(
         db=db,
@@ -91,10 +88,6 @@ def build_prompt(
         }
     )
 
-    # -----------------------------
-    # Retrieved Documents (RAG)
-    # -----------------------------
-
     if rag_context.strip():
         prompt.append(
             {
@@ -107,10 +100,7 @@ def build_prompt(
             }
         )
 
-    # -----------------------------
-    # Conversation History
-    # -----------------------------
-
+    
     messages = (
         db.query(Message)
         .filter(

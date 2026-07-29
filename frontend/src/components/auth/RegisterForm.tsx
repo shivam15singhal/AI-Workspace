@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
+import axios from "axios";
 
 import { register } from "@/services/auth/authService";
 
@@ -23,28 +24,83 @@ export default function RegisterForm() {
 
   const [password, setPassword] = useState("");
 
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  async function handleRegister() {
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  async function handleRegister(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
+
+    setErrorMessage("");
+
+    if (!name.trim()) {
+      setErrorMessage("Please enter your full name.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setErrorMessage("Please enter your email.");
+      return;
+    }
+
+    if (!emailRegex.test(email.trim())) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage("Please enter a password.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage(
+        "Password must be at least 8 characters long."
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
     try {
       setLoading(true);
 
       await register({
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim(),
         password,
       });
 
-      alert("Account created successfully!");
+      navigate("/login", {
+        state: {
+          message:
+            "Account created successfully. Please sign in.",
+        },
+      });
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) {
+        console.error(error);
+      }
 
-      navigate("/login");
-    } catch (error: any) {
-      console.error(error);
-
-      if (error.response?.data?.detail) {
-        alert(error.response.data.detail);
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(
+          error.response?.data?.detail ??
+            "Unable to create account."
+        );
       } else {
-        alert("Unable to create account.");
+        setErrorMessage(
+          "Something went wrong. Please try again."
+        );
       }
     } finally {
       setLoading(false);
@@ -69,73 +125,113 @@ export default function RegisterForm() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
-
-          <Input
-            id="name"
-            placeholder="John Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="h-11 rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-11 rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-11 rounded-xl"
-          />
-        </div>
-
-        <Button
-          onClick={handleRegister}
-          disabled={loading}
-          className="
-            h-11
-            w-full
-            rounded-xl
-            text-base
-            font-medium
-            transition-all
-            duration-200
-            hover:scale-[1.02]
-            active:scale-[0.98]
-          "
+      <CardContent>
+        <form
+          onSubmit={handleRegister}
+          className="space-y-6"
         >
-          {loading ? "Creating Account..." : "Create Account"}
-        </Button>
+          <div className="space-y-2">
+            <Label htmlFor="name">
+              Full Name
+            </Label>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="font-medium text-primary transition-colors hover:underline"
+            <Input
+              id="name"
+              autoFocus
+              autoComplete="name"
+              placeholder="John Doe"
+              value={name}
+              disabled={loading}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">
+              Email
+            </Label>
+
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              disabled={loading}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">
+              Password
+            </Label>
+
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Minimum 8 characters"
+              value={password}
+              disabled={loading}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">
+              Confirm Password
+            </Label>
+
+            <Input
+              id="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              disabled={loading}
+              onChange={(e) =>
+                setConfirmPassword(e.target.value)
+              }
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          {errorMessage && (
+            <p className="text-sm text-destructive">
+              {errorMessage}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className="h-11 w-full rounded-xl text-base font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
-            Sign In
-          </button>
-        </p>
+            {loading
+              ? "Creating Account..."
+              : "Create Account"}
+          </Button>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              Sign In
+            </Link>
+          </p>
+        </form>
       </CardContent>
     </Card>
   );
